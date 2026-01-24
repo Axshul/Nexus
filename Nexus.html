@@ -390,6 +390,25 @@
             font-weight: 500;
         }
 
+        .quick-colors {
+            display: flex;
+            gap: 6px;
+            margin-left: 4px;
+        }
+
+        .color-dot {
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 1px solid rgba(255,255,255,0.1);
+            transition: transform 0.1s;
+        }
+
+        .color-dot:hover {
+            transform: scale(1.25);
+        }
+
         /* Creator Attribution */
         .creator-badge {
             position: absolute;
@@ -423,6 +442,66 @@
             pointer-events: none;
             color: var(--text-dim);
             opacity: 0.5;
+        }
+
+        #node-library {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            max-height: 350px;
+            overflow-y: auto;
+            padding: 10px;
+            background: rgba(0,0,0,0.2);
+            border-radius: 8px;
+        }
+
+        .node-lib-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            padding: 10px;
+            background: #1A1A1A;
+            border: 1px solid var(--panel-border);
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+        }
+
+        .node-lib-item:hover {
+            background: #252525;
+            border-color: var(--accent-color);
+            transform: translateY(-2px);
+        }
+
+        .node-lib-box {
+            width: 44px;
+            height: 44px;
+            background: white;
+            border: 2px solid #FF6C37;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        }
+
+        .node-lib-box img {
+            width: 26px;
+            height: 26px;
+            object-fit: contain;
+        }
+
+        .node-lib-name {
+            font-size: 10px;
+            color: var(--text-dim);
+            text-align: center;
+            font-weight: 500;
+            width: 100%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
         }
 
         /* Improved responsive design */
@@ -476,8 +555,13 @@
         
         <!-- Global Color Selector -->
         <div class="global-color-selector">
-            <span class="global-color-label">Color</span>
-            <input type="color" id="global-color-picker" class="global-color-input" value="#0077FF" title="Global Color">
+            <input type="color" id="global-color-picker" class="global-color-input" value="#0077FF" title="Custom Color">
+            <div class="quick-colors">
+                <div class="color-dot" style="background: #0077FF" data-color="#0077FF"></div>
+                <div class="color-dot" style="background: #00CC88" data-color="#00CC88"></div>
+                <div class="color-dot" style="background: #FF6C37" data-color="#FF6C37"></div>
+                <div class="color-dot" style="background: #FFFFFF" data-color="#FFFFFF"></div>
+            </div>
         </div>
         <div class="divider"></div>
         
@@ -522,13 +606,35 @@
 
     <!-- Sidebar Property Panel -->
     <div class="sidebar hidden" id="sidebar">
+        <!-- Content Editor (Contextual) -->
+        <div class="sidebar-section" id="edit-section" style="display:none; background: rgba(0, 119, 255, 0.05); padding: 10px; border-radius: 8px; border: 1px solid rgba(0, 119, 255, 0.2);">
+            <div class="sidebar-title" id="edit-title">Editor</div>
+            <textarea id="edit-textarea" style="width: 100%; height: 150px; background: #1A1A1A; border: 1px solid var(--panel-border); color: var(--text-main); padding: 8px; border-radius: 4px; font-family: 'Roboto Mono', monospace; font-size: 12px; resize: vertical; margin-bottom: 10px;"></textarea>
+            <button class="tool-btn" id="save-content-btn" style="width: 100%; background: var(--accent-color); color: white; justify-content: center;">Apply Changes</button>
+        </div>
+
         <div class="sidebar-section">
             <div class="sidebar-title">n8n Nodes</div>
             <div class="property-row">
-                <input type="text" id="node-search" placeholder="Search nodes..." style="width: 100%; background: #1A1A1A; border: 1px solid var(--panel-border); color: var(--text-main); padding: 6px; border-radius: 4px; font-size: 12px;">
+                <div style="position:relative; width:100%">
+                    <input type="text" id="node-search" placeholder="Search 40+ nodes..." style="width: 100%; background: #1A1A1A; border: 1px solid var(--panel-border); color: var(--text-main); padding: 8px 8px 8px 30px; border-radius: 6px; font-size: 12px;">
+                    <i data-lucide="search" style="position:absolute; left:8px; top:50%; transform:translateY(-50%); width:14px; color:var(--text-dim)"></i>
+                </div>
             </div>
-            <div id="node-library" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; max-height: 200px; overflow-y: auto; padding: 5px;">
+            <div id="node-library">
                 <!-- Nodes will be injected here -->
+            </div>
+        </div>
+
+        <div class="sidebar-section" id="image-section">
+            <div class="sidebar-title">Assets</div>
+            <div class="property-row">
+                <button class="tool-btn" id="sidebar-upload-btn" style="flex:1; background: rgba(255,255,255,0.05); border: 1px dashed var(--panel-border); font-size: 11px;">
+                    <i data-lucide="upload-cloud" style="width:14px; margin-right:6px"></i> Upload Image
+                </button>
+                <button class="tool-btn" id="sidebar-url-btn" style="flex:1; background: rgba(255,255,255,0.05); border: 1px dashed var(--panel-border); font-size: 11px;">
+                    <i data-lucide="link" style="width:14px; margin-right:6px"></i> From URL
+                </button>
             </div>
         </div>
 
@@ -677,7 +783,7 @@
             preserveObjectStacking: true,
             selection: true,
             perPixelTargeting: true,
-            targetFindTolerance: 4
+            targetFindTolerance: 10
         });
 
         // Initialize Lucide
@@ -712,22 +818,56 @@
 
         // --- Node Library ---
         const n8nNodes = [
-            { name: 'AI Agent', icon: 'https://cdn.jsdelivr.net/gh/n8n-io/n8n@master/packages/nodes-base/nodes/AiAgent/AiAgent.svg' },
-            { name: 'HTTP Request', icon: 'https://cdn.jsdelivr.net/gh/n8n-io/n8n@master/packages/nodes-base/nodes/HttpRequest/httprequest.svg' },
-            { name: 'Set', icon: 'https://cdn.jsdelivr.net/gh/n8n-io/n8n@master/packages/nodes-base/nodes/Set/set.svg' },
-            { name: 'Code', icon: 'https://cdn.jsdelivr.net/gh/n8n-io/n8n@master/packages/nodes-base/nodes/Code/code.svg' },
-            { name: 'Schedule', icon: 'https://cdn.jsdelivr.net/gh/n8n-io/n8n@master/packages/nodes-base/nodes/ScheduleTrigger/scheduleTrigger.svg' },
-            { name: 'Webhook', icon: 'https://cdn.jsdelivr.net/gh/n8n-io/n8n@master/packages/nodes-base/nodes/Webhook/webhook.svg' },
-            { name: 'Gmail', icon: 'https://cdn.jsdelivr.net/gh/n8n-io/n8n@master/packages/nodes-base/nodes/Gmail/gmail.svg' },
-            { name: 'Slack', icon: 'https://cdn.jsdelivr.net/gh/n8n-io/n8n@master/packages/nodes-base/nodes/Slack/slack.svg' },
-            { name: 'OpenAI', icon: 'https://cdn.jsdelivr.net/gh/n8n-io/n8n@master/packages/nodes-base/nodes/OpenAi/openai.svg' },
-            { name: 'PostgreSQL', icon: 'https://cdn.jsdelivr.net/gh/n8n-io/n8n@master/packages/nodes-base/nodes/Postgres/postgres.svg' },
-            { name: 'Airtable', icon: 'https://cdn.jsdelivr.net/gh/n8n-io/n8n@master/packages/nodes-base/nodes/Airtable/airtable.svg' },
-            { name: 'Discord', icon: 'https://cdn.jsdelivr.net/gh/n8n-io/n8n@master/packages/nodes-base/nodes/Discord/discord.svg' },
-            { name: 'Filter', icon: 'https://cdn.jsdelivr.net/gh/n8n-io/n8n@master/packages/nodes-base/nodes/Filter/filter.svg' },
-            { name: 'Merge', icon: 'https://cdn.jsdelivr.net/gh/n8n-io/n8n@master/packages/nodes-base/nodes/Merge/merge.svg' },
-            { name: 'Split In Batches', icon: 'https://cdn.jsdelivr.net/gh/n8n-io/n8n@master/packages/nodes-base/nodes/SplitInBatches/splitInBatches.svg' },
-            { name: 'Wait', icon: 'https://cdn.jsdelivr.net/gh/n8n-io/n8n@master/packages/nodes-base/nodes/Wait/wait.svg' }
+            // Core Nodes
+            { name: 'AI Agent', icon: 'https://cdn.jsdelivr.net/gh/n8n-io/n8n@master/packages/nodes-base/nodes/AiAgent/AiAgent.svg', color: '#FF6C37' },
+            { name: 'HTTP Request', icon: 'https://cdn.jsdelivr.net/gh/n8n-io/n8n@master/packages/nodes-base/nodes/HttpRequest/httpRequest.svg', color: '#FF6C37' },
+            { name: 'Set', icon: 'https://cdn.jsdelivr.net/gh/n8n-io/n8n@master/packages/nodes-base/nodes/Set/set.svg', color: '#FF6C37' },
+            { name: 'Code', icon: 'https://cdn.jsdelivr.net/gh/n8n-io/n8n@master/packages/nodes-base/nodes/Code/code.svg', color: '#FF6C37' },
+            { name: 'Schedule', icon: 'https://cdn.jsdelivr.net/gh/n8n-io/n8n@master/packages/nodes-base/nodes/ScheduleTrigger/scheduleTrigger.svg', color: '#FF6C37' },
+            { name: 'Webhook', icon: 'https://cdn.jsdelivr.net/gh/n8n-io/n8n@master/packages/nodes-base/nodes/Webhook/webhook.svg', color: '#FF6C37' },
+            { name: 'Wait', icon: 'https://cdn.jsdelivr.net/gh/n8n-io/n8n@master/packages/nodes-base/nodes/Wait/wait.svg', color: '#FF6C37' },
+            { name: 'Merge', icon: 'https://cdn.jsdelivr.net/gh/n8n-io/n8n@master/packages/nodes-base/nodes/Merge/merge.svg', color: '#FF6C37' },
+            { name: 'Filter', icon: 'https://cdn.jsdelivr.net/gh/n8n-io/n8n@master/packages/nodes-base/nodes/Filter/filter.svg', color: '#FF6C37' },
+            { name: 'If', icon: 'https://cdn.jsdelivr.net/gh/n8n-io/n8n@master/packages/nodes-base/nodes/If/if.svg', color: '#FF6C37' },
+            { name: 'Execute Workflow', icon: 'https://cdn.jsdelivr.net/gh/n8n-io/n8n@master/packages/nodes-base/nodes/ExecuteWorkflow/executeWorkflow.svg', color: '#FF6C37' },
+            { name: 'Error Trigger', icon: 'https://cdn.jsdelivr.net/gh/n8n-io/n8n@master/packages/nodes-base/nodes/ErrorTrigger/errorTrigger.svg', color: '#FF6C37' },
+
+            // AI & ML
+            { name: 'OpenAI', icon: 'https://cdn.jsdelivr.net/gh/n8n-io/n8n@master/packages/nodes-base/nodes/OpenAi/openAi.svg', color: '#00A67E' },
+            { name: 'Anthropic', icon: 'https://cdn.jsdelivr.net/gh/n8n-io/n8n@master/packages/nodes-base/nodes/Anthropic/anthropic.svg', color: '#D97757' },
+            { name: 'LangChain', icon: 'https://cdn.jsdelivr.net/gh/n8n-io/n8n@master/packages/nodes-base/nodes/LangChain/langchain.svg', color: '#000000' },
+            { name: 'Hugging Face', icon: 'https://cdn.jsdelivr.net/gh/n8n-io/n8n@master/packages/nodes-base/nodes/HuggingFace/huggingface.svg', color: '#FFD21E' },
+
+            // Communication
+            { name: 'Gmail', icon: 'https://cdn.jsdelivr.net/gh/n8n-io/n8n@master/packages/nodes-base/nodes/Gmail/gmail.svg', color: '#EA4335' },
+            { name: 'Slack', icon: 'https://cdn.jsdelivr.net/gh/n8n-io/n8n@master/packages/nodes-base/nodes/Slack/slack.svg', color: '#4A154B' },
+            { name: 'Discord', icon: 'https://cdn.jsdelivr.net/gh/n8n-io/n8n@master/packages/nodes-base/nodes/Discord/discord.svg', color: '#5865F2' },
+            { name: 'Telegram', icon: 'https://cdn.jsdelivr.net/gh/n8n-io/n8n@master/packages/nodes-base/nodes/Telegram/telegram.svg', color: '#26A5E4' },
+            { name: 'WhatsApp', icon: 'https://cdn.jsdelivr.net/gh/n8n-io/n8n@master/packages/nodes-base/nodes/WhatsApp/whatsapp.svg', color: '#25D366' },
+            { name: 'Outlook', icon: 'https://cdn.jsdelivr.net/gh/n8n-io/n8n@master/packages/nodes-base/nodes/Microsoft/Outlook/outlook.svg', color: '#0078D4' },
+            { name: 'Twilio', icon: 'https://cdn.jsdelivr.net/gh/n8n-io/n8n@master/packages/nodes-base/nodes/Twilio/twilio.svg', color: '#F22F46' },
+
+            // Data & Tools
+            { name: 'GitHub', icon: 'https://cdn.jsdelivr.net/gh/n8n-io/n8n@master/packages/nodes-base/nodes/Github/github.svg', color: '#181717' },
+            { name: 'Airtable', icon: 'https://cdn.jsdelivr.net/gh/n8n-io/n8n@master/packages/nodes-base/nodes/Airtable/airtable.svg', color: '#18BFFF' },
+            { name: 'Notion', icon: 'https://cdn.jsdelivr.net/gh/n8n-io/n8n@master/packages/nodes-base/nodes/Notion/notion.svg', color: '#000000' },
+            { name: 'Google Sheets', icon: 'https://cdn.jsdelivr.net/gh/n8n-io/n8n@master/packages/nodes-base/nodes/Google/Sheets/googleSheets.svg', color: '#0F9D58' },
+            { name: 'Google Drive', icon: 'https://cdn.jsdelivr.net/gh/n8n-io/n8n@master/packages/nodes-base/nodes/Google/Drive/googleDrive.svg', color: '#4285F4' },
+            { name: 'Trello', icon: 'https://cdn.jsdelivr.net/gh/n8n-io/n8n@master/packages/nodes-base/nodes/Trello/trello.svg', color: '#0079BF' },
+            { name: 'Jira', icon: 'https://cdn.jsdelivr.net/gh/n8n-io/n8n@master/packages/nodes-base/nodes/Jira/jira.svg', color: '#0052CC' },
+            { name: 'ClickUp', icon: 'https://cdn.jsdelivr.net/gh/n8n-io/n8n@master/packages/nodes-base/nodes/ClickUp/clickup.svg', color: '#7B68EE' },
+            { name: 'HubSpot', icon: 'https://cdn.jsdelivr.net/gh/n8n-io/n8n@master/packages/nodes-base/nodes/Hubspot/hubspot.svg', color: '#FF7A59' },
+            { name: 'Salesforce', icon: 'https://cdn.jsdelivr.net/gh/n8n-io/n8n@master/packages/nodes-base/nodes/Salesforce/salesforce.svg', color: '#00A1E0' },
+            { name: 'Shopify', icon: 'https://cdn.jsdelivr.net/gh/n8n-io/n8n@master/packages/nodes-base/nodes/Shopify/shopify.svg', color: '#96BF48' },
+            { name: 'Stripe', icon: 'https://cdn.jsdelivr.net/gh/n8n-io/n8n@master/packages/nodes-base/nodes/Stripe/stripe.svg', color: '#635BFF' },
+
+            // Database
+            { name: 'PostgreSQL', icon: 'https://cdn.jsdelivr.net/gh/n8n-io/n8n@master/packages/nodes-base/nodes/Postgres/postgres.svg', color: '#336791' },
+            { name: 'MySQL', icon: 'https://cdn.jsdelivr.net/gh/n8n-io/n8n@master/packages/nodes-base/nodes/MySql/mysql.svg', color: '#4479A1' },
+            { name: 'MongoDB', icon: 'https://cdn.jsdelivr.net/gh/n8n-io/n8n@master/packages/nodes-base/nodes/MongoDb/mongoDb.svg', color: '#47A248' },
+            { name: 'Redis', icon: 'https://cdn.jsdelivr.net/gh/n8n-io/n8n@master/packages/nodes-base/nodes/Redis/redis.svg', color: '#DC382D' },
+            { name: 'Supabase', icon: 'https://cdn.jsdelivr.net/gh/n8n-io/n8n@master/packages/nodes-base/nodes/Supabase/supabase.svg', color: '#3ECF8E' },
+            { name: 'Pinecone', icon: 'https://cdn.jsdelivr.net/gh/n8n-io/n8n@master/packages/nodes-base/nodes/Pinecone/pinecone.svg', color: '#000000' }
         ];
 
         function initNodeLibrary() {
@@ -738,10 +878,26 @@
                 library.innerHTML = '';
                 n8nNodes.filter(n => n.name.toLowerCase().includes(filter.toLowerCase())).forEach(node => {
                     const el = document.createElement('div');
-                    el.className = 'tool-btn';
-                    el.style.padding = '8px';
+                    el.className = 'node-lib-item';
                     el.title = node.name;
-                    el.innerHTML = `<img src="${node.icon}" style="width: 24px; height: 24px;">`;
+
+                    const box = document.createElement('div');
+                    box.className = 'node-lib-box';
+                    box.style.borderColor = node.color || '#FF6C37';
+
+                    const img = document.createElement('img');
+                    img.src = node.icon;
+                    img.onerror = () => {
+                        img.src = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiM2NjYiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48cmVjdCB4PSIyIiB5PSIyIiB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHJ4PSI1Ii8+PC9zdmc+';
+                    };
+
+                    const name = document.createElement('div');
+                    name.className = 'node-lib-name';
+                    name.textContent = node.name;
+
+                    box.appendChild(img);
+                    el.appendChild(box);
+                    el.appendChild(name);
                     el.onclick = () => addNodeToCanvas(node);
                     library.appendChild(el);
                 });
@@ -759,16 +915,52 @@
 
         function addNodeToCanvas(node) {
             fabric.Image.fromURL(node.icon, (img) => {
-                img.scaleToWidth(60);
+                img.scaleToWidth(40);
+
+                const rect = new fabric.Rect({
+                    width: 100,
+                    height: 100,
+                    fill: '#FFFFFF',
+                    stroke: node.color || '#FF6C37',
+                    strokeWidth: 3,
+                    rx: 15,
+                    ry: 15,
+                    originX: 'center',
+                    originY: 'center',
+                    shadow: new fabric.Shadow({
+                        color: 'rgba(0,0,0,0.3)',
+                        blur: 10,
+                        offsetX: 0,
+                        offsetY: 4
+                    })
+                });
+
+                const text = new fabric.Text(node.name, {
+                    fontSize: 12,
+                    fontFamily: 'Inter',
+                    fill: '#333333',
+                    originX: 'center',
+                    originY: 'center',
+                    top: 35
+                });
+
                 img.set({
+                    originX: 'center',
+                    originY: 'center',
+                    top: -10
+                });
+
+                const group = new fabric.Group([rect, img, text], {
                     left: canvas.getCenter().left,
                     top: canvas.getCenter().top,
                     originX: 'center',
                     originY: 'center',
-                    id: generateId()
+                    id: generateId(),
+                    subTargetCheck: true
                 });
-                canvas.add(img);
-                canvas.setActiveObject(img);
+
+                canvas.add(group);
+                canvas.setActiveObject(group);
                 saveState();
             }, { crossOrigin: 'anonymous' });
         }
@@ -783,61 +975,15 @@
 
             // Swatches
             document.querySelectorAll('.swatch').forEach(swatch => {
-                swatch.onclick = () => {
-                    const color = swatch.dataset.color;
-                    setColor(color);
-                    
-                    // If we have selected text objects, update their color immediately
-                    const activeObjects = canvas.getActiveObjects();
-                    activeObjects.forEach(obj => {
-                        if (obj.type === 'i-text' || obj.type === 'text') {
-                            obj.set('fill', color);
-                            obj.set('stroke', 'transparent');
-                            obj.set('strokeWidth', 0);
-                        }
-                    });
-                    if (activeObjects.length) {
-                        canvas.renderAll();
-                        saveState();
-                    }
-                };
+                swatch.onclick = () => setColor(swatch.dataset.color);
             });
 
-            customColorPicker.oninput = (e) => {
-                const color = e.target.value;
-                setColor(color);
-                
-                // Immediate update for text objects
-                const activeObjects = canvas.getActiveObjects();
-                activeObjects.forEach(obj => {
-                    if (obj.type === 'i-text' || obj.type === 'text') {
-                        obj.set('fill', color);
-                        obj.set('stroke', 'transparent');
-                        obj.set('strokeWidth', 0);
-                    }
-                });
-                if (activeObjects.length) {
-                    canvas.renderAll();
-                }
-            };
+            customColorPicker.oninput = (e) => setColor(e.target.value);
             
-            globalColorPicker.oninput = (e) => {
-                const color = e.target.value;
-                setColor(color);
-                
-                // Immediate update for text objects
-                const activeObjects = canvas.getActiveObjects();
-                activeObjects.forEach(obj => {
-                    if (obj.type === 'i-text' || obj.type === 'text') {
-                        obj.set('fill', color);
-                        obj.set('stroke', 'transparent');
-                        obj.set('strokeWidth', 0);
-                    }
-                });
-                if (activeObjects.length) {
-                    canvas.renderAll();
-                }
-            };
+            globalColorPicker.oninput = (e) => setColor(e.target.value);
+            document.querySelectorAll('.color-dot').forEach(dot => {
+                dot.onclick = () => setColor(dot.dataset.color);
+            });
 
             // Property updates
             strokeWidthInput.oninput = (e) => updateActiveObjects('strokeWidth', parseInt(e.target.value));
@@ -896,7 +1042,37 @@
 
             // Image upload
             document.getElementById('img-upload-btn').onclick = handleImageBtn;
+            document.getElementById('sidebar-upload-btn').onclick = () => document.getElementById('img-input').click();
+            document.getElementById('sidebar-url-btn').onclick = handleImageUrl;
             document.getElementById('img-input').onchange = handleImageUpload;
+
+            document.getElementById('save-content-btn').onclick = () => {
+                const obj = canvas.getActiveObject();
+                if (!obj) return;
+                const value = document.getElementById('edit-textarea').value;
+
+                if (obj.type === 'markdown-block') {
+                    obj.markdownText = value;
+                    obj.updateContent();
+                    saveState();
+                } else if (obj.type === 'workflow-node') {
+                    try {
+                        const json = JSON.parse(value);
+                        obj.workflowData = json;
+                        if (obj.domElement) {
+                            obj.domElement.setAttribute('workflow', JSON.stringify(json));
+                            // Force web component refresh
+                            const clone = obj.domElement.cloneNode(true);
+                            obj.domElement.parentNode.replaceChild(clone, obj.domElement);
+                            obj.domElement = clone;
+                            obj.syncDOM();
+                        }
+                        saveState();
+                    } catch (e) {
+                        alert('Invalid JSON');
+                    }
+                }
+            };
 
             // Global Resize
             window.onresize = () => {
@@ -906,7 +1082,7 @@
         }
 
         // --- Fabric Extensions & ID Management ---
-        fabric.Object.prototype.includeDefaultValues = false;
+        fabric.Object.prototype.includeDefaultValues = true;
         fabric.Object.prototype.toObject = (function (toObject) {
             return function (propertiesToInclude) {
                 return toObject.call(this, ['id'].concat(propertiesToInclude));
@@ -988,10 +1164,12 @@
                 objectCaching: false,
                 selectable: true,
                 evented: true,
+                padding: 20, // Increased hit area
                 x1: x1,
                 y1: y1,
                 x2: x2 || x1,
-                y2: y2 || y1
+                y2: y2 || y1,
+                perPixelTargeting: false // Better selection for thin lines
             });
             updateArrow(arrow);
             return arrow;
@@ -1025,6 +1203,10 @@
             ];
 
             arrow.set({
+                x1: p1.x,
+                y1: p1.y,
+                x2: p2.x,
+                y2: p2.y,
                 left: p1.x,
                 top: p1.y,
                 points: points,
@@ -1047,8 +1229,9 @@
             initialize: function(text, options) {
                 options = options || {};
                 this.markdownText = text || '# Markdown\nDouble-click to edit';
-                const width = options.width || 300;
-                const height = options.height || 200;
+                this.fontSize = options.fontSize || 18;
+                const width = options.width || 400;
+                const height = options.height || 300;
 
                 const rect = new fabric.Rect({
                     width: width,
@@ -1067,19 +1250,22 @@
             },
             updateContent: function() {
                 const self = this;
-                const width = this.width;
-                const height = this.height;
+                const width = this.width * this.scaleX;
+                const height = this.height * this.scaleY;
                 const html = marked.parse(this.markdownText);
+                const fontSize = this.fontSize || 18;
 
                 const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}">
                     <foreignObject width="100%" height="100%">
-                        <div xmlns="http://www.w3.org/1999/xhtml" style="color: #ECECEC; padding: 20px; font-family: 'Inter', sans-serif; font-size: 14px; line-height: 1.5; overflow: hidden;">
+                        <div xmlns="http://www.w3.org/1999/xhtml" style="color: #ECECEC; padding: 30px; font-family: 'Inter', sans-serif; font-size: ${fontSize}px; line-height: 1.6; overflow: hidden; height: 100%; box-sizing: border-box;">
                             <style>
-                                h1, h2, h3 { color: #0077FF; margin: 0 0 10px 0; font-size: 18px; }
-                                p { margin: 0 0 10px 0; }
-                                code { background: #2A2A2A; padding: 2px 4px; border-radius: 4px; font-family: 'Roboto Mono', monospace; font-size: 12px; }
-                                ul, ol { padding-left: 20px; margin: 0 0 10px 0; }
+                                h1, h2, h3 { color: #0077FF; margin: 0 0 15px 0; font-size: 1.5em; }
+                                p { margin: 0 0 15px 0; }
+                                code { background: #2A2A2A; padding: 4px 8px; border-radius: 4px; font-family: 'Roboto Mono', monospace; font-size: 0.9em; }
+                                ul, ol { padding-left: 30px; margin: 0 0 15px 0; }
+                                li { margin-bottom: 8px; }
                                 strong { color: #00CC88; }
+                                pre { background: #1A1A1A; padding: 15px; border-radius: 8px; overflow: auto; }
                             </style>
                             ${html}
                         </div>
@@ -1096,15 +1282,18 @@
             },
             toObject: function() {
                 return fabric.util.object.extend(this.callSuper('toObject'), {
-                    markdownText: this.markdownText
+                    markdownText: this.markdownText,
+                    fontSize: this.fontSize
                 });
             }
         });
 
         fabric.MarkdownBlock.fromObject = function(object, callback) {
             const block = new fabric.MarkdownBlock(object.markdownText, object);
+            block.set(object);
             callback(block);
         };
+        fabric['markdown-block'] = fabric.MarkdownBlock;
 
         // --- n8n Workflow Node Class ---
         fabric.WorkflowNode = fabric.util.createClass(fabric.Rect, {
@@ -1113,11 +1302,13 @@
                 options = options || {};
                 options.width = options.width || 600;
                 options.height = options.height || 400;
-                options.fill = 'rgba(255, 108, 55, 0.05)';
-                options.stroke = '#FF6C37';
-                options.strokeWidth = 2;
+                options.fill = 'rgba(255, 108, 55, 0.01)';
+                options.stroke = 'rgba(255, 108, 55, 0.2)';
+                options.strokeWidth = 1;
                 options.rx = 12;
                 options.ry = 12;
+                options.originX = 'center';
+                options.originY = 'center';
 
                 this.callSuper('initialize', options);
                 this.workflowData = workflowData || { nodes: [], connections: {} };
@@ -1134,6 +1325,8 @@
                 this.domElement.style.pointerEvents = 'all';
                 this.domElement.style.borderRadius = '12px';
                 this.domElement.style.overflow = 'hidden';
+                this.domElement.style.boxSizing = 'border-box';
+                this.domElement.style.background = '#121212';
                 this.domElement.setAttribute('workflow', JSON.stringify(this.workflowData));
                 document.body.appendChild(this.domElement);
                 this.syncDOM();
@@ -1174,12 +1367,16 @@
         });
 
         fabric.WorkflowNode.fromObject = function(object, callback) {
-            callback(new fabric.WorkflowNode(object.workflowData, object));
+            const node = new fabric.WorkflowNode(object.workflowData, object);
+            node.set(object);
+            callback(node);
         };
+        fabric['workflow-node'] = fabric.WorkflowNode;
 
         function setTool(tool) {
             state.currentTool = tool;
             toolBtns.forEach(btn => btn.classList.toggle('active', btn.dataset.tool === tool));
+            if (tool !== 'arrow') clearPorts();
 
             canvas.isDrawingMode = (tool === 'pencil' || tool === 'eraser');
             canvas.selection = (tool === 'select');
@@ -1199,30 +1396,63 @@
             }
         }
 
-        function setColor(color) {
-            state.currentColor = color;
-            customColorPicker.value = color === 'transparent' ? '#000000' : color;
-            globalColorPicker.value = color === 'transparent' ? '#000000' : color;
+        function applyColorToObject(obj, color) {
+            if (!obj || !color) return;
             
-            // Handle color updates for active objects
-            const activeObjects = canvas.getActiveObjects();
-            if (activeObjects.length) {
-                activeObjects.forEach(obj => {
-                    if (obj.type === 'i-text' || obj.type === 'text') {
-                        // For text objects, only update fill (text color)
-                        obj.set('fill', color);
-                        // Ensure stroke is transparent for text
-                        obj.set('stroke', 'transparent');
-                    } else {
-                        // For other objects, update both stroke and fill
-                        if (obj.type !== 'line' && obj.type !== 'polyline') {
-                            obj.set('fill', color === 'transparent' ? 'transparent' : color + '33');
+            if (obj.type === 'i-text' || obj.type === 'text') {
+                obj.set({ fill: color, stroke: 'transparent', strokeWidth: 0 });
+            } else if (obj.type === 'group') {
+                // If it's one of our node groups, update the main rectangle
+                obj.getObjects().forEach(child => {
+                    if (child.type === 'rect' || child.type === 'circle' || child.type === 'path' || child.type === 'polygon') {
+                        child.set('stroke', color);
+                        // If it has a semi-transparent fill, update it
+                        if (child.fill && child.fill !== 'transparent' && child.fill !== '#ffffff' && child.fill !== '#FFFFFF' && child.fill !== 'white') {
+                             try {
+                                child.set('fill', new fabric.Color(color).setAlpha(0.2).toRgba());
+                             } catch(e) {}
                         }
-                        obj.set('stroke', color);
                     }
                 });
-                canvas.renderAll();
-                saveState();
+            } else if (obj.type === 'polyline' || obj.type === 'line') {
+                obj.set({ stroke: color, fill: 'transparent' });
+            } else {
+                obj.set('stroke', color);
+                if (obj.fill && obj.fill !== 'transparent') {
+                    try {
+                        obj.set('fill', new fabric.Color(color).setAlpha(0.2).toRgba());
+                    } catch(e) {
+                        obj.set('fill', color);
+                    }
+                }
+            }
+        }
+
+        function setColor(color, updateObjects = true) {
+            if (!color) return;
+            state.currentColor = color;
+
+            // Update UI Pickers
+            let hexColor = '#0077FF';
+            try {
+                if (color !== 'transparent' && color.startsWith('#')) {
+                    hexColor = color;
+                } else if (color !== 'transparent') {
+                    hexColor = new fabric.Color(color).toHex();
+                    if (!hexColor.startsWith('#')) hexColor = '#' + hexColor;
+                }
+            } catch(e) {}
+
+            customColorPicker.value = hexColor;
+            globalColorPicker.value = hexColor;
+
+            if (updateObjects) {
+                const activeObjects = canvas.getActiveObjects();
+                if (activeObjects.length) {
+                    activeObjects.forEach(obj => applyColorToObject(obj, color));
+                    canvas.renderAll();
+                    saveState();
+                }
             }
 
             if (state.currentTool === 'pencil' && canvas.freeDrawingBrush) {
@@ -1232,27 +1462,23 @@
             document.querySelectorAll('.swatch').forEach(s => {
                 s.classList.toggle('active', s.dataset.color === color);
             });
+            document.querySelectorAll('.color-dot').forEach(d => {
+                d.style.boxShadow = (d.dataset.color === color) ? '0 0 0 2px var(--accent-color)' : 'none';
+            });
         }
 
         function updateActiveObjects(prop, value) {
             const activeObjects = canvas.getActiveObjects();
             if (activeObjects.length) {
                 activeObjects.forEach(obj => {
-                    // Special handling for text objects
-                    if (obj.type === 'i-text' || obj.type === 'text') {
-                        if (prop === 'stroke') {
-                            // Don't apply stroke to text, use fill instead
-                            obj.set('fill', value);
-                            obj.set('stroke', 'transparent');
-                        } else if (prop === 'fill') {
-                            obj.set('fill', value);
-                        } else {
-                            obj.set(prop, value);
-                        }
+                    if (obj.type === 'activeSelection') {
+                        obj.getObjects().forEach(child => {
+                             if (prop === 'stroke' || prop === 'fill') applyColorToObject(child, value);
+                             else child.set(prop, value);
+                        });
                     } else {
-                        // Handle other objects normally
-                        if (prop === 'fill' && (obj.type === 'line' || obj.type === 'polyline')) return;
-                        obj.set(prop, value);
+                        if (prop === 'stroke' || prop === 'fill') applyColorToObject(obj, value);
+                        else obj.set(prop, value);
                     }
                 });
                 canvas.renderAll();
@@ -1368,7 +1594,9 @@
                 state.lastPosY = e.clientY;
             } else if (state.activeArrow) {
                 const pointer = canvas.getPointer(e);
+                state.activeArrow.evented = false;
                 const target = canvas.findTarget(e);
+                state.activeArrow.evented = true;
 
                 state.activeArrow.set({ x2: pointer.x, y2: pointer.y });
 
@@ -1385,25 +1613,10 @@
         canvas.on('mouse:dblclick', (opt) => {
             if (!opt.target) return;
 
-            if (opt.target.type === 'workflow-node') {
-                const input = prompt('Paste n8n Workflow JSON:');
-                if (input) {
-                    try {
-                        const json = JSON.parse(input);
-                        opt.target.workflowData = json;
-                        opt.target.domElement.setAttribute('workflow', JSON.stringify(json));
-                        saveState();
-                    } catch (e) {
-                        alert('Invalid JSON');
-                    }
-                }
-            } else if (opt.target.type === 'markdown-block') {
-                const newText = prompt('Edit Markdown:', opt.target.markdownText);
-                if (newText !== null) {
-                    opt.target.markdownText = newText;
-                    opt.target.updateContent();
-                    saveState();
-                }
+            if (opt.target.type === 'workflow-node' || opt.target.type === 'markdown-block') {
+                sidebar.classList.remove('hidden');
+                updateSidebarFromSelection();
+                document.getElementById('edit-textarea').focus();
             }
         });
 
@@ -1424,6 +1637,7 @@
                 state.activeArrow = null;
                 setTool('select');
                 saveState();
+                clearPorts();
             }
             state.isPanning = false;
             canvas.selection = state.currentTool === 'select';
@@ -1440,7 +1654,8 @@
                 'id', 'x1', 'y1', 'x2', 'y2',
                 'startObjId', 'endObjId',
                 'startPort', 'endPort',
-                'markdownText', 'workflowData'
+                'markdownText', 'workflowData', 'fontSize',
+                'lockMovementX', 'lockMovementY', 'lockRotation', 'lockScalingX', 'lockScalingY', 'hasControls', 'editable'
             ]));
 
             if (state.historyIndex === -1 || state.history[state.historyIndex] !== json) {
@@ -1477,6 +1692,15 @@
 
         function loadStateFromJSON(json) {
             canvas.loadFromJSON(json, () => {
+                // Ensure all arrows are connected to their objects and updated
+                canvas.getObjects('polyline').forEach(arrow => updateArrow(arrow));
+
+                // Ensure all workflow nodes have their DOM elements synced
+                canvas.getObjects('workflow-node').forEach(node => {
+                    node.createDOMElement();
+                    node.syncDOM();
+                });
+
                 canvas.renderAll();
                 state.isHistoryAction = false;
                 updateUndoRedoButtons();
@@ -1505,7 +1729,8 @@
                     'id', 'x1', 'y1', 'x2', 'y2',
                     'startObjId', 'endObjId',
                     'startPort', 'endPort',
-                    'markdownText', 'workflowData'
+                    'markdownText', 'workflowData', 'fontSize',
+                    'lockMovementX', 'lockMovementY', 'lockRotation', 'lockScalingX', 'lockScalingY', 'hasControls', 'editable'
                 ]));
                 const compressed = LZString.compressToEncodedURIComponent(json);
                 window.history.replaceState(null, null, '#' + compressed);
@@ -1601,26 +1826,28 @@
         }
 
         function handleImageBtn() {
-            const choice = confirm("Upload image? (Cancel for URL)");
-            if (choice) {
-                document.getElementById('img-input').click();
-            } else {
-                const url = prompt("Image URL:");
-                if (url && url.trim()) {
-                    fabric.Image.fromURL(url.trim(), img => {
-                        if (img.width && img.height) {
-                            img.scaleToWidth(Math.min(300, window.innerWidth * 0.3));
-                            canvas.add(img).centerObject(img).setActiveObject(img);
-                            setTool('select');
-                            saveState();
-                        }
-                    }, { 
-                        crossOrigin: 'anonymous',
-                        onError: () => {
-                            alert('Failed to load image. Please check the URL.');
-                        }
-                    });
-                }
+            // Toggle sidebar to Assets section
+            sidebar.classList.remove('hidden');
+            document.getElementById('image-section').scrollIntoView({ behavior: 'smooth' });
+            const btn = document.getElementById('sidebar-upload-btn');
+            btn.style.borderColor = 'var(--accent-color)';
+            setTimeout(() => btn.style.borderColor = 'var(--panel-border)', 1000);
+        }
+
+        function handleImageUrl() {
+            const url = prompt("Enter Image URL:");
+            if (url && url.trim()) {
+                fabric.Image.fromURL(url.trim(), img => {
+                    if (img.width && img.height) {
+                        img.scaleToWidth(Math.min(400, window.innerWidth * 0.4));
+                        canvas.add(img).centerObject(img).setActiveObject(img);
+                        setTool('select');
+                        saveState();
+                    }
+                }, {
+                    crossOrigin: 'anonymous',
+                    onError: () => alert('Could not load image. Check URL and CORS.')
+                });
             }
         }
 
@@ -1673,7 +1900,24 @@
 
         function updateSidebarFromSelection() {
             const obj = canvas.getActiveObject();
-            if (!obj) return;
+            const editSection = document.getElementById('edit-section');
+            const editTitle = document.getElementById('edit-title');
+            const editTextarea = document.getElementById('edit-textarea');
+
+            if (!obj) {
+                editSection.style.display = 'none';
+                return;
+            }
+
+            // Show Edit Section for Markdown and Workflow
+            if (obj.type === 'markdown-block' || obj.type === 'workflow-node') {
+                editSection.style.display = 'block';
+                editTitle.textContent = obj.type === 'markdown-block' ? 'Edit Markdown' : 'Edit Workflow JSON';
+                editTextarea.value = obj.type === 'markdown-block' ? obj.markdownText : JSON.stringify(obj.workflowData, null, 2);
+            } else {
+                editSection.style.display = 'none';
+            }
+
 
             if (obj.strokeWidth) strokeWidthInput.value = obj.strokeWidth;
             if (obj.opacity !== undefined) opacityInput.value = obj.opacity * 100;
@@ -1695,23 +1939,24 @@
             if (obj.type === 'i-text' || obj.type === 'text') {
                 document.getElementById('text-options').style.display = 'block';
                 fontFamilyInput.value = obj.fontFamily || 'Inter';
-                // For text objects, use fill color
                 const textColor = obj.fill;
                 if (textColor && typeof textColor === 'string') {
-                    setColor(textColor);
+                    setColor(textColor, false);
                 }
             } else {
                 document.getElementById('text-options').style.display = 'none';
-                // For other objects, prefer stroke color, fallback to fill
-                const color = obj.stroke || obj.fill;
-                if (color && typeof color === 'string') {
-                    setColor(color);
+                if (obj.type !== 'activeSelection') {
+                    const color = obj.stroke || obj.fill;
+                    if (color && typeof color === 'string') {
+                        setColor(color, false);
+                    }
                 }
             }
         }
 
         canvas.on('mouse:down', (opt) => {
             if (state.currentTool === 'select' || state.currentTool === 'pencil' || state.currentTool === 'hand' || state.currentTool === 'eraser') return;
+            if (opt.button === 3) return; // Right click
 
             const pointer = canvas.getPointer(opt.e);
             let obj;
@@ -1784,6 +2029,8 @@
                 arrow.set({ startObj, startPort });
                 state.activeArrow = arrow;
                 canvas.add(arrow);
+                canvas.setActiveObject(arrow);
+                canvas.renderAll();
                 return;
             }
 
@@ -1883,7 +2130,19 @@
                 debouncedSaveState();
             }
         });
-        canvas.on('object:removed', debouncedSaveState);
+        canvas.on('object:removed', (opt) => {
+            const obj = opt.target;
+
+            // Remove connected arrows
+            const arrows = canvas.getObjects('polyline').filter(a => a.startObj === obj || a.endObj === obj);
+            if (arrows.length > 0) {
+                canvas.remove(...arrows);
+            }
+
+            if (!state.isHistoryAction) {
+                debouncedSaveState();
+            }
+        });
         
         // Handle text editing mode
         canvas.on('text:editing:entered', (e) => {
