@@ -1,11 +1,76 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nexus – Persistent Dark Canvas</title>
+    <title>Nexus - Infinite Canvas Drawing App | Create Diagrams & Sketches Online</title>
+    
+    <!-- SEO Meta Tags -->
+    <meta name="description" content="Nexus is a powerful infinite canvas drawing app for creating diagrams, sketches, and visual content. Auto-saves to URL, supports shapes, text, arrows, and collaborative sharing. Created by Axshul.">
+    <meta name="keywords" content="drawing app, infinite canvas, diagram tool, sketch app, visual collaboration, online whiteboard, drawing software, design tool, Axshul">
+    <meta name="author" content="Axshul">
+    <meta name="robots" content="index, follow">
+    <meta name="language" content="English">
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://yoursite.com/Nexus/">
+    <meta property="og:title" content="Nexus - Infinite Canvas Drawing App">
+    <meta property="og:description" content="Create diagrams and sketches on an infinite dark canvas. Auto-saves to URL for easy sharing. Built by Axshul.">
+    <meta property="og:image" content="https://yoursite.com/assets/img/nexus-preview.png">
+    
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://yoursite.com/Nexus/">
+    <meta property="twitter:title" content="Nexus - Infinite Canvas Drawing App">
+    <meta property="twitter:description" content="Create diagrams and sketches on an infinite dark canvas. Auto-saves to URL for easy sharing. Built by Axshul.">
+    <meta property="twitter:image" content="https://yoursite.com/assets/img/nexus-preview.png">
+    
+    <!-- Canonical URL -->
+    <link rel="canonical" href="https://yoursite.com/Nexus/">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="../assets/favicon_io/favicon.ico">
+    <link rel="apple-touch-icon" sizes="180x180" href="../assets/favicon_io/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="../assets/favicon_io/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="../assets/favicon_io/favicon-16x16.png">
+    
+    <!-- Structured Data -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "WebApplication",
+        "name": "Nexus",
+        "description": "Infinite canvas drawing app for creating diagrams, sketches, and visual content",
+        "url": "https://yoursite.com/Nexus/",
+        "author": {
+            "@type": "Person",
+            "name": "Axshul"
+        },
+        "applicationCategory": "DesignApplication",
+        "operatingSystem": "Web Browser",
+        "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "USD"
+        },
+        "featureList": [
+            "Infinite canvas drawing",
+            "Auto-save to URL",
+            "Shape tools (rectangles, circles, arrows)",
+            "Text editing",
+            "Image upload",
+            "Collaborative sharing",
+            "Undo/Redo functionality",
+            "Export to PNG/SVG"
+        ]
+    }
+    </script>
     <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Roboto+Mono&family=Playfair+Display&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Roboto+Mono&family=Playfair+Display&display=swap"
+        rel="stylesheet">
     <!-- Fabric.js -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.1/fabric.min.js"></script>
     <script src="https://unpkg.com/fabric-eraser-brush@1.1.0/dist/index.js"></script>
@@ -26,7 +91,8 @@
             --sidebar-width: 260px;
         }
 
-        body, html {
+        body,
+        html {
             margin: 0;
             padding: 0;
             width: 100%;
@@ -42,7 +108,7 @@
             width: 100vw;
             height: 100vh;
             background-color: var(--bg-color);
-            background-image: 
+            background-image:
                 radial-gradient(circle, #1A1A1A 1px, transparent 1px);
             background-size: 30px 30px;
         }
@@ -61,7 +127,7 @@
             display: flex;
             gap: 2px;
             z-index: 100;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.8);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.8);
         }
 
         .tool-btn {
@@ -80,7 +146,7 @@
 
         .tool-btn:hover {
             color: var(--text-main);
-            background: rgba(255,255,255,0.04);
+            background: rgba(255, 255, 255, 0.04);
         }
 
         .tool-btn.active {
@@ -117,7 +183,7 @@
             border-radius: 12px;
             padding: 16px;
             z-index: 200;
-            box-shadow: 0 8px 24px rgba(0,0,0,0.6);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
             display: flex;
             flex-direction: column;
             gap: 20px;
@@ -166,7 +232,7 @@
             aspect-ratio: 1;
             border-radius: 4px;
             cursor: pointer;
-            border: 1px solid rgba(255,255,255,0.1);
+            border: 1px solid rgba(255, 255, 255, 0.1);
             transition: transform 0.1s;
         }
 
@@ -259,7 +325,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0,0,0,0.8);
+            background: rgba(0, 0, 0, 0.8);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -290,6 +356,56 @@
             z-index: 100;
         }
 
+        /* Global Color Selector */
+        .global-color-selector {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 4px 8px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 6px;
+            border: 1px solid var(--panel-border);
+        }
+
+        .global-color-input {
+            width: 24px;
+            height: 24px;
+            border: none;
+            border-radius: 4px;
+            background: none;
+            cursor: pointer;
+            outline: none;
+        }
+
+        .global-color-label {
+            font-size: 11px;
+            color: var(--text-dim);
+            font-weight: 500;
+        }
+
+        /* Creator Attribution */
+        .creator-badge {
+            position: absolute;
+            bottom: 15px;
+            right: 15px;
+            background: var(--panel-bg);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--panel-border);
+            border-radius: 8px;
+            padding: 6px 12px;
+            font-size: 11px;
+            color: var(--text-dim);
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .creator-badge:hover {
+            color: var(--text-main);
+            border-color: var(--accent-color);
+        }
+
         /* Empty State */
         #empty-state {
             position: absolute;
@@ -301,8 +417,41 @@
             color: var(--text-dim);
             opacity: 0.5;
         }
+
+        /* Improved responsive design */
+        @media (max-width: 768px) {
+            .toolbar {
+                flex-wrap: wrap;
+                max-width: 90vw;
+            }
+            
+            .sidebar {
+                width: calc(100vw - 30px);
+                left: 15px;
+                right: 15px;
+            }
+            
+            .creator-badge {
+                display: none;
+            }
+        }
+
+        /* Better focus states for accessibility */
+        .tool-btn:focus,
+        input:focus,
+        select:focus {
+            outline: 2px solid var(--accent-color);
+            outline-offset: 2px;
+        }
+
+        /* Loading state */
+        .loading {
+            opacity: 0.5;
+            pointer-events: none;
+        }
     </style>
 </head>
+
 <body>
     <div id="canvas-container">
         <canvas id="nexus-canvas"></canvas>
@@ -317,6 +466,14 @@
             <i data-lucide="hand"></i><kbd>H</kbd>
         </button>
         <div class="divider"></div>
+        
+        <!-- Global Color Selector -->
+        <div class="global-color-selector">
+            <span class="global-color-label">Color</span>
+            <input type="color" id="global-color-picker" class="global-color-input" value="#0077FF" title="Global Color">
+        </div>
+        <div class="divider"></div>
+        
         <button class="tool-btn" data-tool="text" title="Text">
             <i data-lucide="type"></i><kbd>T</kbd>
         </button>
@@ -362,10 +519,12 @@
                 <div class="swatch" style="background: #FF69B4" data-color="#FF69B4"></div>
                 <div class="swatch" style="background: #00FFFF" data-color="#00FFFF"></div>
                 <div class="swatch" style="background: #7FFF00" data-color="#7FFF00"></div>
-                <div class="swatch" style="background: transparent; border: 1px dashed #555" data-color="transparent"></div>
+                <div class="swatch" style="background: transparent; border: 1px dashed #555" data-color="transparent">
+                </div>
             </div>
             <div class="property-row">
-                <input type="color" id="custom-color-picker" style="width: 100%; height: 30px; border: none; border-radius: 4px; background: none; cursor: pointer;">
+                <input type="color" id="custom-color-picker"
+                    style="width: 100%; height: 30px; border: none; border-radius: 4px; background: none; cursor: pointer;">
             </div>
         </div>
 
@@ -408,14 +567,19 @@
         <div class="sidebar-section">
             <div class="sidebar-title">Actions</div>
             <div class="property-row">
-                <button class="tool-btn" id="bring-front" title="Bring to Front" style="flex:1"><i data-lucide="layers-2"></i></button>
-                <button class="tool-btn" id="send-back" title="Send to Back" style="flex:1"><i data-lucide="layers-2" style="transform:rotate(180deg)"></i></button>
-                <button class="tool-btn" id="lock-btn" title="Lock/Unlock" style="flex:1"><i data-lucide="lock"></i></button>
+                <button class="tool-btn" id="bring-front" title="Bring to Front" style="flex:1"><i
+                        data-lucide="layers-2"></i></button>
+                <button class="tool-btn" id="send-back" title="Send to Back" style="flex:1"><i data-lucide="layers-2"
+                        style="transform:rotate(180deg)"></i></button>
+                <button class="tool-btn" id="lock-btn" title="Lock/Unlock" style="flex:1"><i
+                        data-lucide="lock"></i></button>
                 <button class="tool-btn" id="delete-btn" title="Delete" style="flex:1"><i data-lucide="x"></i></button>
             </div>
             <div class="property-row">
-                <button class="tool-btn" id="group-btn" title="Group" style="flex:1"><i data-lucide="combine"></i></button>
-                <button class="tool-btn" id="ungroup-btn" title="Ungroup" style="flex:1"><i data-lucide="split"></i></button>
+                <button class="tool-btn" id="group-btn" title="Group" style="flex:1"><i
+                        data-lucide="combine"></i></button>
+                <button class="tool-btn" id="ungroup-btn" title="Ungroup" style="flex:1"><i
+                        data-lucide="split"></i></button>
             </div>
         </div>
     </div>
@@ -441,6 +605,12 @@
         </div>
     </div>
 
+    <!-- Creator Badge -->
+    <div class="creator-badge">
+        <i data-lucide="palette"></i>
+        <span>Created by Axshul</span>
+    </div>
+
     <!-- Help Button -->
     <button class="tool-btn help-btn" id="help-toggle">
         <i data-lucide="help-circle"></i>
@@ -451,12 +621,15 @@
         <div class="modal">
             <h2 style="margin-top:0; color: var(--accent-color)">Nexus</h2>
             <p>Draw, type, and create on an infinite dark canvas.</p>
+            <p style="font-size: 12px; color: var(--text-dim); margin: 10px 0;">Created by <strong>Axshul</strong></p>
             <div style="text-align: left; margin: 20px 0; font-size: 14px; color: var(--text-dim)">
                 <p>• <b>Auto-save:</b> Every 10 seconds, the URL updates with your changes.</p>
                 <p>• <b>Sharing:</b> Simply copy the URL and share it. It's your save file.</p>
+                <p>• <b>Global Color:</b> Use the color picker in the toolbar to set colors for all new objects.</p>
                 <p>• <b>Shortcuts:</b> V (Select), T (Text), R (Rect), P (Pencil), Del (Delete).</p>
             </div>
-            <button class="tool-btn" id="help-close" style="width: 100%; background: var(--accent-color); color: white; margin-top: 10px;">Got it</button>
+            <button class="tool-btn" id="help-close"
+                style="width: 100%; background: var(--accent-color); color: white; margin-top: 10px;">Got it</button>
         </div>
     </div>
 
@@ -496,6 +669,7 @@
         const toolBtns = document.querySelectorAll('.tool-btn[data-tool]');
         const swatchGrid = document.getElementById('swatch-grid');
         const customColorPicker = document.getElementById('custom-color-picker');
+        const globalColorPicker = document.getElementById('global-color-picker');
         const strokeWidthInput = document.getElementById('stroke-width');
         const opacityInput = document.getElementById('opacity');
         const strokeDashInput = document.getElementById('stroke-dash');
@@ -514,10 +688,61 @@
 
             // Swatches
             document.querySelectorAll('.swatch').forEach(swatch => {
-                swatch.onclick = () => setColor(swatch.dataset.color);
+                swatch.onclick = () => {
+                    const color = swatch.dataset.color;
+                    setColor(color);
+                    
+                    // If we have selected text objects, update their color immediately
+                    const activeObjects = canvas.getActiveObjects();
+                    activeObjects.forEach(obj => {
+                        if (obj.type === 'i-text' || obj.type === 'text') {
+                            obj.set('fill', color);
+                            obj.set('stroke', 'transparent');
+                            obj.set('strokeWidth', 0);
+                        }
+                    });
+                    if (activeObjects.length) {
+                        canvas.renderAll();
+                        saveState();
+                    }
+                };
             });
 
-            customColorPicker.oninput = (e) => setColor(e.target.value);
+            customColorPicker.oninput = (e) => {
+                const color = e.target.value;
+                setColor(color);
+                
+                // Immediate update for text objects
+                const activeObjects = canvas.getActiveObjects();
+                activeObjects.forEach(obj => {
+                    if (obj.type === 'i-text' || obj.type === 'text') {
+                        obj.set('fill', color);
+                        obj.set('stroke', 'transparent');
+                        obj.set('strokeWidth', 0);
+                    }
+                });
+                if (activeObjects.length) {
+                    canvas.renderAll();
+                }
+            };
+            
+            globalColorPicker.oninput = (e) => {
+                const color = e.target.value;
+                setColor(color);
+                
+                // Immediate update for text objects
+                const activeObjects = canvas.getActiveObjects();
+                activeObjects.forEach(obj => {
+                    if (obj.type === 'i-text' || obj.type === 'text') {
+                        obj.set('fill', color);
+                        obj.set('stroke', 'transparent');
+                        obj.set('strokeWidth', 0);
+                    }
+                });
+                if (activeObjects.length) {
+                    canvas.renderAll();
+                }
+            };
 
             // Property updates
             strokeWidthInput.oninput = (e) => updateActiveObjects('strokeWidth', parseInt(e.target.value));
@@ -560,6 +785,8 @@
             document.getElementById('delete-btn').onclick = deleteSelected;
             document.getElementById('lock-btn').onclick = toggleLock;
             document.getElementById('clear-btn').onclick = clearCanvas;
+            document.getElementById('group-btn').onclick = groupSelected;
+            document.getElementById('ungroup-btn').onclick = ungroupSelected;
             document.getElementById('undo-btn').onclick = undo;
             document.getElementById('redo-btn').onclick = redo;
             document.getElementById('export-png').onclick = exportPNG;
@@ -585,37 +812,44 @@
 
         function createArrow(x, y) {
             const headLength = 15;
+            const headWidth = 8;
             const points = [
-                {x: 0, y: 0},
-                {x: 80, y: 0},
-                {x: 80 - headLength, y: -headLength/2},
-                {x: 80, y: 0},
-                {x: 80 - headLength, y: headLength/2},
-                {x: 80, y: 0}
+                { x: 0, y: 0 },
+                { x: 80, y: 0 },
+                { x: 80 - headLength, y: -headWidth },
+                { x: 80, y: 0 },
+                { x: 80 - headLength, y: headWidth }
             ];
-            return new fabric.Polyline(points, {
+            
+            const arrow = new fabric.Polyline(points, {
                 left: x,
                 top: y,
                 stroke: state.currentColor,
-                strokeWidth: parseInt(strokeWidthInput.value),
+                strokeWidth: parseInt(strokeWidthInput.value) || 2,
                 fill: 'transparent',
-                originX: 'center',
+                strokeLineCap: 'round',
+                strokeLineJoin: 'round',
+                originX: 'left',
                 originY: 'center',
-                objectCaching: false
+                objectCaching: false,
+                selectable: true,
+                evented: true
             });
+            
+            return arrow;
         }
 
         function setTool(tool) {
             state.currentTool = tool;
             toolBtns.forEach(btn => btn.classList.toggle('active', btn.dataset.tool === tool));
-            
+
             canvas.isDrawingMode = (tool === 'pencil' || tool === 'eraser');
             canvas.selection = (tool === 'select');
             canvas.defaultCursor = (tool === 'hand') ? 'grab' : (tool === 'select' ? 'default' : 'crosshair');
-            
+
             if (canvas.isDrawingMode) {
-                canvas.freeDrawingBrush = (tool === 'eraser') 
-                    ? new fabric.EraserBrush(canvas) 
+                canvas.freeDrawingBrush = (tool === 'eraser')
+                    ? new fabric.EraserBrush(canvas)
                     : new fabric.PencilBrush(canvas);
                 canvas.freeDrawingBrush.width = parseInt(strokeWidthInput.value);
                 if (tool === 'pencil') canvas.freeDrawingBrush.color = state.currentColor;
@@ -630,13 +864,33 @@
         function setColor(color) {
             state.currentColor = color;
             customColorPicker.value = color === 'transparent' ? '#000000' : color;
-            updateActiveObjects('stroke', color);
-            updateActiveObjects('fill', color);
+            globalColorPicker.value = color === 'transparent' ? '#000000' : color;
             
-            if (state.currentTool === 'pencil') {
+            // Handle color updates for active objects
+            const activeObjects = canvas.getActiveObjects();
+            if (activeObjects.length) {
+                activeObjects.forEach(obj => {
+                    if (obj.type === 'i-text' || obj.type === 'text') {
+                        // For text objects, only update fill (text color)
+                        obj.set('fill', color);
+                        // Ensure stroke is transparent for text
+                        obj.set('stroke', 'transparent');
+                    } else {
+                        // For other objects, update both stroke and fill
+                        if (obj.type !== 'line' && obj.type !== 'polyline') {
+                            obj.set('fill', color === 'transparent' ? 'transparent' : color + '33');
+                        }
+                        obj.set('stroke', color);
+                    }
+                });
+                canvas.renderAll();
+                saveState();
+            }
+
+            if (state.currentTool === 'pencil' && canvas.freeDrawingBrush) {
                 canvas.freeDrawingBrush.color = color;
             }
-            
+
             document.querySelectorAll('.swatch').forEach(s => {
                 s.classList.toggle('active', s.dataset.color === color);
             });
@@ -646,10 +900,20 @@
             const activeObjects = canvas.getActiveObjects();
             if (activeObjects.length) {
                 activeObjects.forEach(obj => {
-                    if (prop === 'fill' && (obj.type === 'line' || obj.type === 'polyline')) return;
-                    if (prop === 'stroke' && obj.type === 'i-text') {
-                        obj.set('fill', value);
+                    // Special handling for text objects
+                    if (obj.type === 'i-text' || obj.type === 'text') {
+                        if (prop === 'stroke') {
+                            // Don't apply stroke to text, use fill instead
+                            obj.set('fill', value);
+                            obj.set('stroke', 'transparent');
+                        } else if (prop === 'fill') {
+                            obj.set('fill', value);
+                        } else {
+                            obj.set(prop, value);
+                        }
                     } else {
+                        // Handle other objects normally
+                        if (prop === 'fill' && (obj.type === 'line' || obj.type === 'polyline')) return;
                         obj.set(prop, value);
                     }
                 });
@@ -760,21 +1024,21 @@
 
         function saveState() {
             if (state.isHistoryAction) return;
-            
+
             // Optimization: Only serialize if there's an actual change
             const json = JSON.stringify(canvas.toDatalessJSON());
-            
+
             if (state.historyIndex === -1 || state.history[state.historyIndex] !== json) {
                 state.history = state.history.slice(0, state.historyIndex + 1);
                 state.history.push(json);
                 state.historyIndex++;
-                
+
                 // Limit history size
                 if (state.history.length > 50) {
                     state.history.shift();
                     state.historyIndex--;
                 }
-                
+
                 debounceSaveToURL();
                 updateUndoRedoButtons();
             }
@@ -817,7 +1081,7 @@
                 const json = JSON.stringify(canvas.toDatalessJSON());
                 const compressed = LZString.compressToEncodedURIComponent(json);
                 window.history.replaceState(null, null, '#' + compressed);
-                
+
                 statusDot.classList.add('active');
                 saveStatusText.textContent = 'Synced';
                 setTimeout(() => statusDot.classList.remove('active'), 1000);
@@ -830,17 +1094,24 @@
         function loadFromURL() {
             const hash = window.location.hash.substring(1);
             if (!hash) return;
+            
             try {
+                document.body.classList.add('loading');
                 const decompressed = LZString.decompressFromEncodedURIComponent(hash);
                 if (decompressed) {
                     canvas.loadFromJSON(decompressed, () => {
                         canvas.renderAll();
                         if (canvas.getObjects().length) emptyState.style.display = 'none';
                         saveState(); // Initialize history
+                        document.body.classList.remove('loading');
                     });
+                } else {
+                    document.body.classList.remove('loading');
                 }
             } catch (err) {
                 console.error('Load failed', err);
+                saveStatusText.textContent = 'Load failed';
+                document.body.classList.remove('loading');
             }
         }
 
@@ -875,25 +1146,52 @@
 
         function handleImageBtn() {
             const choice = confirm("Upload image? (Cancel for URL)");
-            if (choice) document.getElementById('img-input').click();
-            else {
+            if (choice) {
+                document.getElementById('img-input').click();
+            } else {
                 const url = prompt("Image URL:");
-                if (url) fabric.Image.fromURL(url, img => {
-                    img.scaleToWidth(300);
-                    canvas.add(img).centerObject(img).setActiveObject(img);
-                    setTool('select');
-                }, { crossOrigin: 'anonymous' });
+                if (url && url.trim()) {
+                    fabric.Image.fromURL(url.trim(), img => {
+                        if (img.width && img.height) {
+                            img.scaleToWidth(Math.min(300, window.innerWidth * 0.3));
+                            canvas.add(img).centerObject(img).setActiveObject(img);
+                            setTool('select');
+                            saveState();
+                        }
+                    }, { 
+                        crossOrigin: 'anonymous',
+                        onError: () => {
+                            alert('Failed to load image. Please check the URL.');
+                        }
+                    });
+                }
             }
         }
 
         function handleImageUpload(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            
+            if (!file.type.startsWith('image/')) {
+                alert('Please select a valid image file.');
+                return;
+            }
+            
             const reader = new FileReader();
-            reader.onload = f => fabric.Image.fromURL(f.target.result, img => {
-                img.scaleToWidth(300);
-                canvas.add(img).centerObject(img).setActiveObject(img);
-                setTool('select');
-            });
-            reader.readAsDataURL(e.target.files[0]);
+            reader.onload = f => {
+                fabric.Image.fromURL(f.target.result, img => {
+                    if (img.width && img.height) {
+                        img.scaleToWidth(Math.min(300, window.innerWidth * 0.3));
+                        canvas.add(img).centerObject(img).setActiveObject(img);
+                        setTool('select');
+                        saveState();
+                    }
+                });
+            };
+            reader.onerror = () => {
+                alert('Failed to read the image file.');
+            };
+            reader.readAsDataURL(file);
         }
 
         // --- Fabric Events ---
@@ -921,7 +1219,7 @@
 
             if (obj.strokeWidth) strokeWidthInput.value = obj.strokeWidth;
             if (obj.opacity !== undefined) opacityInput.value = obj.opacity * 100;
-            
+
             if (obj.strokeDashArray) {
                 if (obj.strokeDashArray[0] === 10) strokeDashInput.value = 'dashed';
                 else if (obj.strokeDashArray[0] === 2) strokeDashInput.value = 'dotted';
@@ -930,40 +1228,68 @@
                 strokeDashInput.value = 'solid';
             }
 
-            if (obj.type === 'i-text') {
+            if (obj.type === 'i-text' || obj.type === 'text') {
                 document.getElementById('text-options').style.display = 'block';
-                fontFamilyInput.value = obj.fontFamily;
+                fontFamilyInput.value = obj.fontFamily || 'Inter';
+                // For text objects, use fill color
+                const textColor = obj.fill;
+                if (textColor && typeof textColor === 'string') {
+                    setColor(textColor);
+                }
             } else {
                 document.getElementById('text-options').style.display = 'none';
-            }
-
-            const color = obj.stroke || obj.fill;
-            if (color && typeof color === 'string') {
-                setColor(color);
+                // For other objects, prefer stroke color, fallback to fill
+                const color = obj.stroke || obj.fill;
+                if (color && typeof color === 'string') {
+                    setColor(color);
+                }
             }
         }
 
         canvas.on('mouse:down', (opt) => {
             if (state.currentTool === 'select' || state.currentTool === 'pencil' || state.currentTool === 'hand' || state.currentTool === 'eraser') return;
-            
+
             const pointer = canvas.getPointer(opt.e);
             let obj;
+            const strokeWidth = parseInt(strokeWidthInput.value) || 2;
             const common = {
                 left: pointer.x,
                 top: pointer.y,
                 stroke: state.currentColor,
-                strokeWidth: parseInt(strokeWidthInput.value),
+                strokeWidth: strokeWidth,
                 fill: 'transparent',
                 originX: 'center',
-                originY: 'center'
+                originY: 'center',
+                selectable: true,
+                evented: true
             };
 
             if (state.currentTool === 'rect') {
-                obj = new fabric.Rect({ ...common, width: 100, height: 100, fill: state.currentColor === 'transparent' ? 'transparent' : state.currentColor + '33' });
+                const fillColor = state.currentColor === 'transparent' ? 'transparent' : state.currentColor + '33';
+                obj = new fabric.Rect({ 
+                    ...common, 
+                    width: 100, 
+                    height: 100, 
+                    fill: fillColor,
+                    rx: 5,
+                    ry: 5
+                });
             } else if (state.currentTool === 'circle') {
-                obj = new fabric.Circle({ ...common, radius: 50, fill: state.currentColor === 'transparent' ? 'transparent' : state.currentColor + '33' });
+                const fillColor = state.currentColor === 'transparent' ? 'transparent' : state.currentColor + '33';
+                obj = new fabric.Circle({ 
+                    ...common, 
+                    radius: 50, 
+                    fill: fillColor 
+                });
             } else if (state.currentTool === 'text') {
-                obj = new fabric.IText('Type something...', { ...common, fill: state.currentColor, fontSize: 24, fontFamily: fontFamilyInput.value });
+                obj = new fabric.IText('Type something...', { 
+                    ...common, 
+                    fill: state.currentColor, 
+                    fontSize: 24, 
+                    fontFamily: fontFamilyInput.value || 'Inter',
+                    stroke: 'transparent',
+                    strokeWidth: 0
+                });
             } else if (state.currentTool === 'arrow') {
                 obj = createArrow(pointer.x, pointer.y);
             }
@@ -980,7 +1306,7 @@
         // Keyboard Shortcuts
         window.onkeydown = (e) => {
             if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.isContentEditable) return;
-            
+
             if (e.ctrlKey || e.metaKey) {
                 if (e.key === 'z') { e.preventDefault(); undo(); }
                 if (e.key === 'y') { e.preventDefault(); redo(); }
@@ -988,7 +1314,7 @@
                 return;
             }
 
-            switch(e.key.toLowerCase()) {
+            switch (e.key.toLowerCase()) {
                 case 'v': setTool('select'); break;
                 case 'h': setTool('hand'); break;
                 case 't': setTool('text'); break;
@@ -1005,20 +1331,66 @@
         // Initialize Everything
         initUI();
         setTool('select');
-        window.onload = loadFromURL;
+        
+        // Load from URL when ready
+        window.addEventListener('load', () => {
+            loadFromURL();
+            // Initialize first state for undo/redo
+            setTimeout(() => {
+                if (state.history.length === 0) {
+                    saveState();
+                }
+            }, 100);
+        });
 
-        // Auto-save fallback
-        setInterval(saveToURL, 10000);
+        // Auto-save fallback with better timing
+        setInterval(() => {
+            if (canvas.getObjects().length > 0) {
+                saveToURL();
+            }
+        }, 10000);
 
-        // Canvas modification hooks
-        canvas.on('object:modified', saveState);
+        // Canvas modification hooks with debouncing
+        let modificationTimeout;
+        const debouncedSaveState = () => {
+            clearTimeout(modificationTimeout);
+            modificationTimeout = setTimeout(saveState, 100);
+        };
+
+        canvas.on('object:modified', debouncedSaveState);
         canvas.on('object:added', () => {
             if (!state.isHistoryAction) {
                 emptyState.style.display = 'none';
-                saveState();
+                debouncedSaveState();
             }
         });
-        canvas.on('object:removed', saveState);
+        canvas.on('object:removed', debouncedSaveState);
+        
+        // Handle text editing mode
+        canvas.on('text:editing:entered', (e) => {
+            const textObj = e.target;
+            // Ensure text color is preserved during editing
+            if (textObj.fill) {
+                textObj.set('stroke', 'transparent');
+                textObj.set('strokeWidth', 0);
+            }
+        });
+        
+        canvas.on('text:editing:exited', (e) => {
+            const textObj = e.target;
+            // Ensure text properties are correct after editing
+            textObj.set('stroke', 'transparent');
+            textObj.set('strokeWidth', 0);
+            canvas.renderAll();
+            saveState();
+        });
+        
+        // Better error handling for canvas operations
+        canvas.on('error', (e) => {
+            console.error('Canvas error:', e);
+            saveStatusText.textContent = 'Error occurred';
+        });
     </script>
 </body>
+
 </html>
