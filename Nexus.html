@@ -4,10 +4,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nexus - Infinite Canvas Drawing App | Create Diagrams & Sketches Online</title>
+    <title>NEXUS for AI Engineers - Infinite Canvas Workflow Tool</title>
     
     <!-- SEO Meta Tags -->
-    <meta name="description" content="Nexus is a powerful infinite canvas drawing app for creating diagrams, sketches, and visual content. Auto-saves to URL, supports shapes, text, arrows, and collaborative sharing. Created by Axshul.">
+    <meta name="description" content="NEXUS is a specialized infinite canvas tool for AI and N8N engineers to design, document, and present automation workflows. Created by Axshul.">
     <meta name="keywords" content="drawing app, infinite canvas, diagram tool, sketch app, visual collaboration, online whiteboard, drawing software, design tool, Axshul">
     <meta name="author" content="Axshul">
     <meta name="robots" content="index, follow">
@@ -16,15 +16,15 @@
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://yoursite.com/Nexus/">
-    <meta property="og:title" content="Nexus - Infinite Canvas Drawing App">
-    <meta property="og:description" content="Create diagrams and sketches on an infinite dark canvas. Auto-saves to URL for easy sharing. Built by Axshul.">
+    <meta property="og:title" content="NEXUS for AI Engineers">
+    <meta property="og:description" content="Infinite canvas tool for AI and N8N engineers to design and present workflows. Built by Axshul.">
     <meta property="og:image" content="https://yoursite.com/assets/img/nexus-preview.png">
     
     <!-- Twitter -->
     <meta property="twitter:card" content="summary_large_image">
     <meta property="twitter:url" content="https://yoursite.com/Nexus/">
-    <meta property="twitter:title" content="Nexus - Infinite Canvas Drawing App">
-    <meta property="twitter:description" content="Create diagrams and sketches on an infinite dark canvas. Auto-saves to URL for easy sharing. Built by Axshul.">
+    <meta property="twitter:title" content="NEXUS for AI Engineers">
+    <meta property="twitter:description" content="Infinite canvas tool for AI and N8N engineers to design and present workflows. Built by Axshul.">
     <meta property="twitter:image" content="https://yoursite.com/assets/img/nexus-preview.png">
     
     <!-- Canonical URL -->
@@ -41,8 +41,8 @@
     {
         "@context": "https://schema.org",
         "@type": "WebApplication",
-        "name": "Nexus",
-        "description": "Infinite canvas drawing app for creating diagrams, sketches, and visual content",
+        "name": "NEXUS for AI Engineers",
+        "description": "Specialized infinite canvas tool for AI and N8N engineers to design and present workflows",
         "url": "https://yoursite.com/Nexus/",
         "author": {
             "@type": "Person",
@@ -113,7 +113,7 @@
             height: 100vh;
             background-color: var(--bg-color);
             background-image:
-                radial-gradient(circle, #252525 1px, transparent 1px);
+                radial-gradient(circle, #333333 1px, transparent 1px);
             background-size: 30px 30px;
         }
 
@@ -728,10 +728,10 @@
         <span>Created by Axshul</span>
     </a>
 
-    <!-- Watermark -->
-    <div style="position: absolute; top: 20px; right: 80px; font-family: 'Inter', sans-serif; text-align: right; pointer-events: none; user-select: none; z-index: 1;">
-        <div style="font-weight: 800; font-size: 32px; letter-spacing: 0.3em; color: rgba(255,255,255,0.05);">NEXUS</div>
-        <div style="font-weight: 400; font-size: 10px; letter-spacing: 0.1em; color: rgba(255,255,255,0.1); margin-top: -5px;">FOR AI ENGINEERS</div>
+    <!-- Permanent Branding -->
+    <div style="position: absolute; top: 30px; right: 80px; font-family: 'Inter', sans-serif; text-align: right; pointer-events: none; user-select: none; z-index: 1;">
+        <div style="font-weight: 800; font-size: 42px; letter-spacing: 0.4em; color: rgba(255,255,255,0.12);">NEXUS</div>
+        <div style="font-weight: 400; font-size: 12px; letter-spacing: 0.2em; color: rgba(255,255,255,0.2); margin-top: -4px;">FOR AI ENGINEERS</div>
     </div>
 
     <!-- Help Button -->
@@ -756,9 +756,8 @@
         </div>
     </div>
 
-    <!-- Empty State -->
+    <!-- Empty State Info -->
     <div id="empty-state">
-        <h1 style="font-weight: 200; letter-spacing: 0.2em; margin-bottom: 10px;">N E X U S</h1>
         <p>Start creating. Everything is auto-saved to this URL.</p>
     </div>
 
@@ -1211,6 +1210,7 @@
 
             canvas.isDrawingMode = (tool === 'pencil' || tool === 'eraser');
             canvas.selection = (tool === 'select');
+            canvas.skipTargetFind = (tool === 'hand');
             canvas.defaultCursor = (tool === 'hand') ? 'grab' : (tool === 'select' ? 'default' : 'crosshair');
 
             if (canvas.isDrawingMode) {
