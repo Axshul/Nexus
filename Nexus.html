@@ -78,9 +78,6 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/lz-string/1.5.0/lz-string.min.js"></script>
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
-    <!-- Marked.js for Markdown -->
-    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-
     <!-- n8n Workflow Preview CDN -->
     <script src="https://cdn.jsdelivr.net/npm/@webcomponents/webcomponentsjs@2.0.0/webcomponents-loader.js"></script>
     <script src="https://www.unpkg.com/lit@2.0.0-rc.2/polyfill-support.js"></script>
@@ -568,16 +565,10 @@
         <button class="tool-btn" data-tool="text" title="Text">
             <i data-lucide="type"></i><kbd>T</kbd>
         </button>
-        <button class="tool-btn" data-tool="markdown" title="Markdown Box">
-            <i data-lucide="file-text"></i><kbd>M</kbd>
-        </button>
-        <button class="tool-btn" data-tool="workflow" title="n8n Workflow">
-            <i data-lucide="git-branch"></i><kbd>W</kbd>
+        <button class="tool-btn" data-tool="workflow" title="n8n Node / Showcase">
+            <i data-lucide="box"></i><kbd>W</kbd>
         </button>
         <div class="divider"></div>
-        <button class="tool-btn" id="library-toggle" title="Node Library">
-            <i data-lucide="library"></i><kbd>L</kbd>
-        </button>
         <button class="tool-btn" data-tool="rect" title="Rectangle">
             <i data-lucide="square"></i><kbd>R</kbd>
         </button>
@@ -599,6 +590,9 @@
             <input type="file" id="img-input" accept="image/*" style="display:none">
         </button>
         <div class="divider"></div>
+        <button class="tool-btn" id="present-btn" title="Presentation Mode">
+            <i data-lucide="play"></i>
+        </button>
         <button class="tool-btn" id="clear-btn" title="Clear All">
             <i data-lucide="trash-2"></i>
         </button>
@@ -608,22 +602,10 @@
     <div class="sidebar hidden" id="sidebar">
         <!-- Content Editor (Contextual) -->
         <div class="sidebar-section" id="edit-section" style="display:none; background: rgba(0, 119, 255, 0.05); padding: 10px; border-radius: 8px; border: 1px solid rgba(0, 119, 255, 0.2);">
-            <div class="sidebar-title" id="edit-title">Editor</div>
-            <textarea id="edit-textarea" style="width: 100%; height: 150px; background: #1A1A1A; border: 1px solid var(--panel-border); color: var(--text-main); padding: 8px; border-radius: 4px; font-family: 'Roboto Mono', monospace; font-size: 12px; resize: vertical; margin-bottom: 10px;"></textarea>
+            <div class="sidebar-title" id="edit-title">Node Editor</div>
+            <p style="font-size: 10px; color: var(--text-dim); margin: 0 0 8px 0;">Paste N8N Node JSON below to render it.</p>
+            <textarea id="edit-textarea" placeholder='{"nodes": [...]}' style="width: 100%; height: 150px; background: #1A1A1A; border: 1px solid var(--panel-border); color: var(--text-main); padding: 8px; border-radius: 4px; font-family: 'Roboto Mono', monospace; font-size: 12px; resize: vertical; margin-bottom: 10px;"></textarea>
             <button class="tool-btn" id="save-content-btn" style="width: 100%; background: var(--accent-color); color: white; justify-content: center;">Apply Changes</button>
-        </div>
-
-        <div class="sidebar-section">
-            <div class="sidebar-title">n8n Nodes</div>
-            <div class="property-row">
-                <div style="position:relative; width:100%">
-                    <input type="text" id="node-search" placeholder="Search 40+ nodes..." style="width: 100%; background: #1A1A1A; border: 1px solid var(--panel-border); color: var(--text-main); padding: 8px 8px 8px 30px; border-radius: 6px; font-size: 12px;">
-                    <i data-lucide="search" style="position:absolute; left:8px; top:50%; transform:translateY(-50%); width:14px; color:var(--text-dim)"></i>
-                </div>
-            </div>
-            <div id="node-library">
-                <!-- Nodes will be injected here -->
-            </div>
         </div>
 
         <div class="sidebar-section" id="image-section">
@@ -741,9 +723,14 @@
     </div>
 
     <!-- Creator Badge -->
-    <div class="creator-badge">
+    <a href="https://axshul.site" target="_blank" class="creator-badge" style="text-decoration: none;">
         <i data-lucide="palette"></i>
         <span>Created by Axshul</span>
+    </a>
+
+    <!-- Watermark -->
+    <div style="position: absolute; top: 20px; right: 80px; font-family: 'Inter', sans-serif; font-weight: 800; font-size: 24px; letter-spacing: 0.3em; color: rgba(255,255,255,0.03); pointer-events: none; user-select: none; z-index: 1;">
+        NEXUS
     </div>
 
     <!-- Help Button -->
@@ -798,7 +785,8 @@
             history: [],
             historyIndex: -1,
             isLocked: false,
-            lastSave: 0
+            lastSave: 0,
+            isPresenting: false
         };
 
         // UI References
@@ -817,101 +805,9 @@
         const emptyState = document.getElementById('empty-state');
 
         // --- Node Library ---
-        const n8nNodes = [
-            // Core Nodes
-            { name: 'AI Agent', icon: 'https://cdn.jsdelivr.net/gh/n8n-io/n8n@master/packages/nodes-base/nodes/AiAgent/AiAgent.svg', color: '#FF6C37' },
-            { name: 'HTTP Request', icon: 'https://cdn.jsdelivr.net/gh/n8n-io/n8n@master/packages/nodes-base/nodes/HttpRequest/httpRequest.svg', color: '#FF6C37' },
-            { name: 'Set', icon: 'https://cdn.jsdelivr.net/gh/n8n-io/n8n@master/packages/nodes-base/nodes/Set/set.svg', color: '#FF6C37' },
-            { name: 'Code', icon: 'https://cdn.jsdelivr.net/gh/n8n-io/n8n@master/packages/nodes-base/nodes/Code/code.svg', color: '#FF6C37' },
-            { name: 'Schedule', icon: 'https://cdn.jsdelivr.net/gh/n8n-io/n8n@master/packages/nodes-base/nodes/ScheduleTrigger/scheduleTrigger.svg', color: '#FF6C37' },
-            { name: 'Webhook', icon: 'https://cdn.jsdelivr.net/gh/n8n-io/n8n@master/packages/nodes-base/nodes/Webhook/webhook.svg', color: '#FF6C37' },
-            { name: 'Wait', icon: 'https://cdn.jsdelivr.net/gh/n8n-io/n8n@master/packages/nodes-base/nodes/Wait/wait.svg', color: '#FF6C37' },
-            { name: 'Merge', icon: 'https://cdn.jsdelivr.net/gh/n8n-io/n8n@master/packages/nodes-base/nodes/Merge/merge.svg', color: '#FF6C37' },
-            { name: 'Filter', icon: 'https://cdn.jsdelivr.net/gh/n8n-io/n8n@master/packages/nodes-base/nodes/Filter/filter.svg', color: '#FF6C37' },
-            { name: 'If', icon: 'https://cdn.jsdelivr.net/gh/n8n-io/n8n@master/packages/nodes-base/nodes/If/if.svg', color: '#FF6C37' },
-            { name: 'Execute Workflow', icon: 'https://cdn.jsdelivr.net/gh/n8n-io/n8n@master/packages/nodes-base/nodes/ExecuteWorkflow/executeWorkflow.svg', color: '#FF6C37' },
-            { name: 'Error Trigger', icon: 'https://cdn.jsdelivr.net/gh/n8n-io/n8n@master/packages/nodes-base/nodes/ErrorTrigger/errorTrigger.svg', color: '#FF6C37' },
+        // (Library removed as per user request to use dynamic Node Showcase)
+        const n8nNodes = [];
 
-            // AI & ML
-            { name: 'OpenAI', icon: 'https://cdn.jsdelivr.net/gh/n8n-io/n8n@master/packages/nodes-base/nodes/OpenAi/openAi.svg', color: '#00A67E' },
-            { name: 'Anthropic', icon: 'https://cdn.jsdelivr.net/gh/n8n-io/n8n@master/packages/nodes-base/nodes/Anthropic/anthropic.svg', color: '#D97757' },
-            { name: 'LangChain', icon: 'https://cdn.jsdelivr.net/gh/n8n-io/n8n@master/packages/nodes-base/nodes/LangChain/langchain.svg', color: '#000000' },
-            { name: 'Hugging Face', icon: 'https://cdn.jsdelivr.net/gh/n8n-io/n8n@master/packages/nodes-base/nodes/HuggingFace/huggingface.svg', color: '#FFD21E' },
-
-            // Communication
-            { name: 'Gmail', icon: 'https://cdn.jsdelivr.net/gh/n8n-io/n8n@master/packages/nodes-base/nodes/Gmail/gmail.svg', color: '#EA4335' },
-            { name: 'Slack', icon: 'https://cdn.jsdelivr.net/gh/n8n-io/n8n@master/packages/nodes-base/nodes/Slack/slack.svg', color: '#4A154B' },
-            { name: 'Discord', icon: 'https://cdn.jsdelivr.net/gh/n8n-io/n8n@master/packages/nodes-base/nodes/Discord/discord.svg', color: '#5865F2' },
-            { name: 'Telegram', icon: 'https://cdn.jsdelivr.net/gh/n8n-io/n8n@master/packages/nodes-base/nodes/Telegram/telegram.svg', color: '#26A5E4' },
-            { name: 'WhatsApp', icon: 'https://cdn.jsdelivr.net/gh/n8n-io/n8n@master/packages/nodes-base/nodes/WhatsApp/whatsapp.svg', color: '#25D366' },
-            { name: 'Outlook', icon: 'https://cdn.jsdelivr.net/gh/n8n-io/n8n@master/packages/nodes-base/nodes/Microsoft/Outlook/outlook.svg', color: '#0078D4' },
-            { name: 'Twilio', icon: 'https://cdn.jsdelivr.net/gh/n8n-io/n8n@master/packages/nodes-base/nodes/Twilio/twilio.svg', color: '#F22F46' },
-
-            // Data & Tools
-            { name: 'GitHub', icon: 'https://cdn.jsdelivr.net/gh/n8n-io/n8n@master/packages/nodes-base/nodes/Github/github.svg', color: '#181717' },
-            { name: 'Airtable', icon: 'https://cdn.jsdelivr.net/gh/n8n-io/n8n@master/packages/nodes-base/nodes/Airtable/airtable.svg', color: '#18BFFF' },
-            { name: 'Notion', icon: 'https://cdn.jsdelivr.net/gh/n8n-io/n8n@master/packages/nodes-base/nodes/Notion/notion.svg', color: '#000000' },
-            { name: 'Google Sheets', icon: 'https://cdn.jsdelivr.net/gh/n8n-io/n8n@master/packages/nodes-base/nodes/Google/Sheets/googleSheets.svg', color: '#0F9D58' },
-            { name: 'Google Drive', icon: 'https://cdn.jsdelivr.net/gh/n8n-io/n8n@master/packages/nodes-base/nodes/Google/Drive/googleDrive.svg', color: '#4285F4' },
-            { name: 'Trello', icon: 'https://cdn.jsdelivr.net/gh/n8n-io/n8n@master/packages/nodes-base/nodes/Trello/trello.svg', color: '#0079BF' },
-            { name: 'Jira', icon: 'https://cdn.jsdelivr.net/gh/n8n-io/n8n@master/packages/nodes-base/nodes/Jira/jira.svg', color: '#0052CC' },
-            { name: 'ClickUp', icon: 'https://cdn.jsdelivr.net/gh/n8n-io/n8n@master/packages/nodes-base/nodes/ClickUp/clickup.svg', color: '#7B68EE' },
-            { name: 'HubSpot', icon: 'https://cdn.jsdelivr.net/gh/n8n-io/n8n@master/packages/nodes-base/nodes/Hubspot/hubspot.svg', color: '#FF7A59' },
-            { name: 'Salesforce', icon: 'https://cdn.jsdelivr.net/gh/n8n-io/n8n@master/packages/nodes-base/nodes/Salesforce/salesforce.svg', color: '#00A1E0' },
-            { name: 'Shopify', icon: 'https://cdn.jsdelivr.net/gh/n8n-io/n8n@master/packages/nodes-base/nodes/Shopify/shopify.svg', color: '#96BF48' },
-            { name: 'Stripe', icon: 'https://cdn.jsdelivr.net/gh/n8n-io/n8n@master/packages/nodes-base/nodes/Stripe/stripe.svg', color: '#635BFF' },
-
-            // Database
-            { name: 'PostgreSQL', icon: 'https://cdn.jsdelivr.net/gh/n8n-io/n8n@master/packages/nodes-base/nodes/Postgres/postgres.svg', color: '#336791' },
-            { name: 'MySQL', icon: 'https://cdn.jsdelivr.net/gh/n8n-io/n8n@master/packages/nodes-base/nodes/MySql/mysql.svg', color: '#4479A1' },
-            { name: 'MongoDB', icon: 'https://cdn.jsdelivr.net/gh/n8n-io/n8n@master/packages/nodes-base/nodes/MongoDb/mongoDb.svg', color: '#47A248' },
-            { name: 'Redis', icon: 'https://cdn.jsdelivr.net/gh/n8n-io/n8n@master/packages/nodes-base/nodes/Redis/redis.svg', color: '#DC382D' },
-            { name: 'Supabase', icon: 'https://cdn.jsdelivr.net/gh/n8n-io/n8n@master/packages/nodes-base/nodes/Supabase/supabase.svg', color: '#3ECF8E' },
-            { name: 'Pinecone', icon: 'https://cdn.jsdelivr.net/gh/n8n-io/n8n@master/packages/nodes-base/nodes/Pinecone/pinecone.svg', color: '#000000' }
-        ];
-
-        function initNodeLibrary() {
-            const library = document.getElementById('node-library');
-            const search = document.getElementById('node-search');
-
-            const renderNodes = (filter = '') => {
-                library.innerHTML = '';
-                n8nNodes.filter(n => n.name.toLowerCase().includes(filter.toLowerCase())).forEach(node => {
-                    const el = document.createElement('div');
-                    el.className = 'node-lib-item';
-                    el.title = node.name;
-
-                    const box = document.createElement('div');
-                    box.className = 'node-lib-box';
-                    box.style.borderColor = node.color || '#FF6C37';
-
-                    const img = document.createElement('img');
-                    img.src = node.icon;
-                    img.onerror = () => {
-                        img.src = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiM2NjYiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48cmVjdCB4PSIyIiB5PSIyIiB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHJ4PSI1Ii8+PC9zdmc+';
-                    };
-
-                    const name = document.createElement('div');
-                    name.className = 'node-lib-name';
-                    name.textContent = node.name;
-
-                    box.appendChild(img);
-                    el.appendChild(box);
-                    el.appendChild(name);
-                    el.onclick = () => addNodeToCanvas(node);
-                    library.appendChild(el);
-                });
-            };
-
-            search.oninput = (e) => renderNodes(e.target.value);
-            renderNodes();
-
-            document.getElementById('library-toggle').onclick = () => {
-                const sidebar = document.getElementById('sidebar');
-                sidebar.classList.toggle('library-open');
-                sidebar.classList.toggle('hidden', !sidebar.classList.contains('library-open') && !canvas.getActiveObject());
-            };
-        }
 
         function addNodeToCanvas(node) {
             fabric.Image.fromURL(node.icon, (img) => {
@@ -967,7 +863,6 @@
 
         // --- UI Initialization ---
         function initUI() {
-            initNodeLibrary();
             // Tool selection
             toolBtns.forEach(btn => {
                 btn.onclick = () => setTool(btn.dataset.tool);
@@ -1035,6 +930,7 @@
             document.getElementById('export-json').onclick = exportJSON;
             document.getElementById('import-json').onclick = importJSON;
             document.getElementById('copy-link').onclick = copyShareLink;
+            document.getElementById('present-btn').onclick = togglePresentation;
 
             // Help overlay
             document.getElementById('help-toggle').onclick = () => document.getElementById('help-overlay').classList.add('visible');
@@ -1051,11 +947,7 @@
                 if (!obj) return;
                 const value = document.getElementById('edit-textarea').value;
 
-                if (obj.type === 'markdown-block') {
-                    obj.markdownText = value;
-                    obj.updateContent();
-                    saveState();
-                } else if (obj.type === 'workflow-node') {
+                if (obj.type === 'workflow-node') {
                     try {
                         const json = JSON.parse(value);
                         obj.workflowData = json;
@@ -1223,90 +1115,19 @@
             });
         }
 
-        // --- Markdown Block Class ---
-        fabric.MarkdownBlock = fabric.util.createClass(fabric.Group, {
-            type: 'markdown-block',
-            initialize: function(text, options) {
-                options = options || {};
-                this.markdownText = text || '# Markdown\nDouble-click to edit';
-                this.fontSize = options.fontSize || 18;
-                const width = options.width || 400;
-                const height = options.height || 300;
-
-                const rect = new fabric.Rect({
-                    width: width,
-                    height: height,
-                    fill: '#121212',
-                    stroke: '#2A2A2A',
-                    strokeWidth: 2,
-                    rx: 12,
-                    ry: 12,
-                    originX: 'center',
-                    originY: 'center'
-                });
-
-                this.callSuper('initialize', [rect], options);
-                this.updateContent();
-            },
-            updateContent: function() {
-                const self = this;
-                const width = this.width * this.scaleX;
-                const height = this.height * this.scaleY;
-                const html = marked.parse(this.markdownText);
-                const fontSize = this.fontSize || 18;
-
-                const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}">
-                    <foreignObject width="100%" height="100%">
-                        <div xmlns="http://www.w3.org/1999/xhtml" style="color: #ECECEC; padding: 30px; font-family: 'Inter', sans-serif; font-size: ${fontSize}px; line-height: 1.6; overflow: hidden; height: 100%; box-sizing: border-box;">
-                            <style>
-                                h1, h2, h3 { color: #0077FF; margin: 0 0 15px 0; font-size: 1.5em; }
-                                p { margin: 0 0 15px 0; }
-                                code { background: #2A2A2A; padding: 4px 8px; border-radius: 4px; font-family: 'Roboto Mono', monospace; font-size: 0.9em; }
-                                ul, ol { padding-left: 30px; margin: 0 0 15px 0; }
-                                li { margin-bottom: 8px; }
-                                strong { color: #00CC88; }
-                                pre { background: #1A1A1A; padding: 15px; border-radius: 8px; overflow: auto; }
-                            </style>
-                            ${html}
-                        </div>
-                    </foreignObject>
-                </svg>`;
-
-                const url = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
-                fabric.Image.fromURL(url, function(img) {
-                    if (self._objects[1]) self.remove(self._objects[1]);
-                    img.set({ originX: 'center', originY: 'center' });
-                    self.addWithUpdate(img);
-                    canvas.renderAll();
-                });
-            },
-            toObject: function() {
-                return fabric.util.object.extend(this.callSuper('toObject'), {
-                    markdownText: this.markdownText,
-                    fontSize: this.fontSize
-                });
-            }
-        });
-
-        fabric.MarkdownBlock.fromObject = function(object, callback) {
-            const block = new fabric.MarkdownBlock(object.markdownText, object);
-            block.set(object);
-            callback(block);
-        };
-        fabric['markdown-block'] = fabric.MarkdownBlock;
 
         // --- n8n Workflow Node Class ---
         fabric.WorkflowNode = fabric.util.createClass(fabric.Rect, {
             type: 'workflow-node',
             initialize: function(workflowData, options) {
                 options = options || {};
-                options.width = options.width || 600;
-                options.height = options.height || 400;
-                options.fill = 'rgba(255, 108, 55, 0.01)';
-                options.stroke = 'rgba(255, 108, 55, 0.2)';
+                options.width = options.width || 120; // Default smaller size for single node
+                options.height = options.height || 120;
+                options.fill = 'rgba(255, 255, 255, 0.01)';
+                options.stroke = 'rgba(255, 108, 55, 0.3)';
                 options.strokeWidth = 1;
-                options.rx = 12;
-                options.ry = 12;
+                options.rx = 15;
+                options.ry = 15;
                 options.originX = 'center';
                 options.originY = 'center';
 
@@ -1511,6 +1332,47 @@
             }
         }
 
+        function togglePresentation() {
+            state.isPresenting = !state.isPresenting;
+            const btn = document.getElementById('present-btn');
+            btn.classList.toggle('active', state.isPresenting);
+
+            if (state.isPresenting) {
+                // Enter presentation mode
+                document.querySelector('.sidebar').classList.add('hidden');
+                document.querySelector('.toolbar').style.opacity = '0.2';
+                document.querySelector('.bottom-bar').style.opacity = '0.2';
+
+                // Allow only specific tools
+                const forbiddenTools = ['workflow', 'rect', 'circle', 'arrow', 'image', 'trash-2'];
+                document.querySelectorAll('.tool-btn[data-tool], .tool-btn#img-upload-btn, .tool-btn#clear-btn').forEach(b => {
+                    const tool = b.dataset.tool || b.id;
+                    if (forbiddenTools.some(t => tool.includes(t))) {
+                        b.style.display = 'none';
+                    }
+                });
+
+                // Set pencil as default for highlighting
+                setTool('pencil');
+                if (!document.fullscreenElement) {
+                    document.documentElement.requestFullscreen().catch(e => console.log(e));
+                }
+            } else {
+                // Exit presentation mode
+                document.querySelector('.toolbar').style.opacity = '1';
+                document.querySelector('.bottom-bar').style.opacity = '1';
+                document.querySelectorAll('.tool-btn').forEach(b => b.style.display = 'flex');
+
+                if (document.fullscreenElement) {
+                    document.exitFullscreen();
+                }
+                setTool('select');
+            }
+
+            // Re-hide library open state if any
+            sidebar.classList.remove('library-open');
+        }
+
         function toggleLock() {
             const activeObjects = canvas.getActiveObjects();
             if (activeObjects.length === 0) return;
@@ -1570,6 +1432,12 @@
 
         canvas.on('mouse:down', (opt) => {
             const evt = opt.e;
+
+            // Hide sidebar if clicking empty canvas
+            if (!opt.target) {
+                sidebar.classList.add('hidden');
+            }
+
             if (state.currentTool === 'hand' || evt.altKey || evt.button === 1) {
                 state.isPanning = true;
                 canvas.selection = false;
@@ -1654,7 +1522,7 @@
                 'id', 'x1', 'y1', 'x2', 'y2',
                 'startObjId', 'endObjId',
                 'startPort', 'endPort',
-                'markdownText', 'workflowData', 'fontSize',
+                'workflowData', 'fontSize',
                 'lockMovementX', 'lockMovementY', 'lockRotation', 'lockScalingX', 'lockScalingY', 'hasControls', 'editable'
             ]));
 
@@ -1723,13 +1591,20 @@
         }
 
         function saveToURL() {
+            if (!canvas || canvas.getObjects().length === 0) {
+                 // Don't clutter the URL if canvas is empty
+                 if (window.location.hash) {
+                    window.history.replaceState(null, null, ' ');
+                 }
+                 return;
+            }
             try {
                 prepareForSave();
                 const json = JSON.stringify(canvas.toDatalessJSON([
                     'id', 'x1', 'y1', 'x2', 'y2',
                     'startObjId', 'endObjId',
                     'startPort', 'endPort',
-                    'markdownText', 'workflowData', 'fontSize',
+                    'workflowData', 'fontSize',
                     'lockMovementX', 'lockMovementY', 'lockRotation', 'lockScalingX', 'lockScalingY', 'hasControls', 'editable'
                 ]));
                 const compressed = LZString.compressToEncodedURIComponent(json);
@@ -1909,11 +1784,11 @@
                 return;
             }
 
-            // Show Edit Section for Markdown and Workflow
-            if (obj.type === 'markdown-block' || obj.type === 'workflow-node') {
+            // Show Edit Section for Workflow
+            if (obj.type === 'workflow-node') {
                 editSection.style.display = 'block';
-                editTitle.textContent = obj.type === 'markdown-block' ? 'Edit Markdown' : 'Edit Workflow JSON';
-                editTextarea.value = obj.type === 'markdown-block' ? obj.markdownText : JSON.stringify(obj.workflowData, null, 2);
+                editTitle.textContent = 'Edit Workflow JSON';
+                editTextarea.value = JSON.stringify(obj.workflowData, null, 2);
             } else {
                 editSection.style.display = 'none';
             }
@@ -2005,13 +1880,6 @@
                     left: pointer.x,
                     top: pointer.y
                 });
-            } else if (state.currentTool === 'markdown') {
-                obj = new fabric.MarkdownBlock('# New Node\n- Use markdown here\n- **Bold** support\n- `Code` support', {
-                    left: pointer.x,
-                    top: pointer.y,
-                    width: 300,
-                    height: 200
-                });
             } else if (state.currentTool === 'arrow') {
                 const target = canvas.findTarget(opt.e);
                 let startX = pointer.x, startY = pointer.y;
@@ -2058,7 +1926,6 @@
                 case 'v': setTool('select'); break;
                 case 'h': setTool('hand'); break;
                 case 't': setTool('text'); break;
-                case 'm': setTool('markdown'); break;
                 case 'w': setTool('workflow'); break;
                 case 'l': document.getElementById('library-toggle').click(); break;
                 case 'r': setTool('rect'); break;
@@ -2095,7 +1962,7 @@
 
         // Auto-save fallback with better timing
         setInterval(() => {
-            if (canvas.getObjects().length > 0) {
+            if (canvas && canvas.getObjects().length > 0) {
                 saveToURL();
             }
         }, 10000);
