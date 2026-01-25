@@ -113,7 +113,7 @@
             height: 100vh;
             background-color: var(--bg-color);
             background-image:
-                radial-gradient(circle, #1A1A1A 1px, transparent 1px);
+                radial-gradient(circle, #252525 1px, transparent 1px);
             background-size: 30px 30px;
         }
 
@@ -729,8 +729,9 @@
     </a>
 
     <!-- Watermark -->
-    <div style="position: absolute; top: 20px; right: 80px; font-family: 'Inter', sans-serif; font-weight: 800; font-size: 24px; letter-spacing: 0.3em; color: rgba(255,255,255,0.03); pointer-events: none; user-select: none; z-index: 1;">
-        NEXUS
+    <div style="position: absolute; top: 20px; right: 80px; font-family: 'Inter', sans-serif; text-align: right; pointer-events: none; user-select: none; z-index: 1;">
+        <div style="font-weight: 800; font-size: 32px; letter-spacing: 0.3em; color: rgba(255,255,255,0.05);">NEXUS</div>
+        <div style="font-weight: 400; font-size: 10px; letter-spacing: 0.1em; color: rgba(255,255,255,0.1); margin-top: -5px;">FOR AI ENGINEERS</div>
     </div>
 
     <!-- Help Button -->
@@ -1139,7 +1140,16 @@
             },
             createDOMElement: function() {
                 if (this.domElement) return;
+
+                // Check if an element with this ID already exists (e.g. from a previous partial load)
+                const existing = document.getElementById('node-overlay-' + this.id);
+                if (existing) {
+                    this.domElement = existing;
+                    return;
+                }
+
                 this.domElement = document.createElement('n8n-demo');
+                this.domElement.id = 'node-overlay-' + this.id;
                 this.domElement.className = 'workflow-overlay';
                 this.domElement.style.position = 'fixed';
                 this.domElement.style.zIndex = '50';
@@ -1337,14 +1347,36 @@
             const btn = document.getElementById('present-btn');
             btn.classList.toggle('active', state.isPresenting);
 
+            // Toggle Icon between Play and Square (Stop)
+            btn.innerHTML = state.isPresenting ? '<i data-lucide="square"></i>' : '<i data-lucide="play"></i>';
+            lucide.createIcons();
+
             if (state.isPresenting) {
+                // Save state before presentation to discard changes later
+                state.prePresentJson = JSON.stringify(canvas.toDatalessJSON([
+                    'id', 'x1', 'y1', 'x2', 'y2', 'startObjId', 'endObjId', 'startPort', 'endPort',
+                    'workflowData', 'fontSize', 'lockMovementX', 'lockMovementY', 'lockRotation', 'lockScalingX', 'lockScalingY', 'hasControls', 'editable'
+                ]));
+
+                // Lock all current objects
+                canvas.getObjects().forEach(obj => {
+                    obj._originalLockState = {
+                        lX: obj.lockMovementX, lY: obj.lockMovementY, lR: obj.lockRotation,
+                        sX: obj.lockScalingX, sY: obj.lockScalingY, hC: obj.hasControls, ed: obj.editable
+                    };
+                    obj.set({
+                        lockMovementX: true, lockMovementY: true, lockRotation: true,
+                        lockScalingX: true, lockScalingY: true, hasControls: false, editable: false
+                    });
+                });
+
                 // Enter presentation mode
                 document.querySelector('.sidebar').classList.add('hidden');
-                document.querySelector('.toolbar').style.opacity = '0.2';
-                document.querySelector('.bottom-bar').style.opacity = '0.2';
+                document.querySelector('.toolbar').style.opacity = '0.3';
+                document.querySelector('.bottom-bar').style.opacity = '0.3';
 
-                // Allow only specific tools
-                const forbiddenTools = ['workflow', 'rect', 'circle', 'arrow', 'image', 'trash-2'];
+                // Allow only specific tools (Pencil, Rect, Circle, Text for explaining)
+                const forbiddenTools = ['workflow', 'arrow', 'image', 'trash-2'];
                 document.querySelectorAll('.tool-btn[data-tool], .tool-btn#img-upload-btn, .tool-btn#clear-btn').forEach(b => {
                     const tool = b.dataset.tool || b.id;
                     if (forbiddenTools.some(t => tool.includes(t))) {
@@ -1352,7 +1384,6 @@
                     }
                 });
 
-                // Set pencil as default for highlighting
                 setTool('pencil');
                 if (!document.fullscreenElement) {
                     document.documentElement.requestFullscreen().catch(e => console.log(e));
@@ -1366,10 +1397,32 @@
                 if (document.fullscreenElement) {
                     document.exitFullscreen();
                 }
+
+                // Discard presentation markings by reloading pre-presentation state
+                if (state.prePresentJson) {
+                    loadStateFromJSON(state.prePresentJson);
+                    state.prePresentJson = null;
+                } else {
+                    // Fallback cleanup if pre-present state missing
+                    canvas.getObjects().forEach(obj => {
+                        if (obj._originalLockState) {
+                            obj.set({
+                                lockMovementX: obj._originalLockState.lX,
+                                lockMovementY: obj._originalLockState.lY,
+                                lockRotation: obj._originalLockState.lR,
+                                lockScalingX: obj._originalLockState.sX,
+                                lockScalingY: obj._originalLockState.sY,
+                                hasControls: obj._originalLockState.hC,
+                                editable: obj._originalLockState.ed
+                            });
+                            delete obj._originalLockState;
+                        }
+                    });
+                }
+
                 setTool('select');
             }
 
-            // Re-hide library open state if any
             sidebar.classList.remove('library-open');
         }
 
@@ -1559,13 +1612,31 @@
         }
 
         function loadStateFromJSON(json) {
+            // Store current IDs to cleanup orphaned DOM elements
+            const currentOverlayIds = canvas.getObjects('workflow-node').map(n => 'node-overlay-' + n.id);
+
             canvas.loadFromJSON(json, () => {
+                const newOverlayIds = canvas.getObjects('workflow-node').map(n => 'node-overlay-' + n.id);
+
+                // Cleanup DOM elements that are no longer in the canvas
+                document.querySelectorAll('.workflow-overlay').forEach(el => {
+                    if (!newOverlayIds.includes(el.id)) el.remove();
+                });
+
                 // Ensure all arrows are connected to their objects and updated
                 canvas.getObjects('polyline').forEach(arrow => updateArrow(arrow));
 
                 // Ensure all workflow nodes have their DOM elements synced
                 canvas.getObjects('workflow-node').forEach(node => {
                     node.createDOMElement();
+
+                    // Only update the 'workflow' attribute if it's actually different to avoid flashing
+                    const currentWorkflowAttr = node.domElement.getAttribute('workflow');
+                    const newWorkflowAttr = JSON.stringify(node.workflowData);
+                    if (currentWorkflowAttr !== newWorkflowAttr) {
+                        node.domElement.setAttribute('workflow', newWorkflowAttr);
+                    }
+
                     node.syncDOM();
                 });
 
@@ -1643,12 +1714,46 @@
             }
         }
 
-        function exportPNG() {
+        async function exportPNG() {
+            // Web components like <n8n-demo> are not part of the canvas bitmap.
+            // We need to temporarily render them into SVG images that Fabric can rasterize.
+            const workflowNodes = canvas.getObjects('workflow-node');
+            const placeholders = [];
+
+            for (const node of workflowNodes) {
+                // n8n-demo is too complex for simple SVG foreignObject in some browsers
+                // but we can try to grab its SVG internal representation if available,
+                // or just draw a high-quality placeholder.
+                // Since this is a static tool, we'll use a reliable fallback:
+                // We'll draw the node's visual state onto a temporary canvas if possible.
+
+                // For now, let's improve the SVG representation of these nodes
+                const rect = new fabric.Rect({
+                    left: node.left, top: node.top, width: node.width, height: node.height,
+                    fill: '#121212', stroke: '#FF6C37', strokeWidth: 2, rx: 15, ry: 15,
+                    angle: node.angle, scaleX: node.scaleX, scaleY: node.scaleY, originX: 'center', originY: 'center'
+                });
+
+                const label = new fabric.Text("n8n Workflow Preview", {
+                    left: node.left, top: node.top, fontSize: 16, fill: '#FF6C37',
+                    angle: node.angle, originX: 'center', originY: 'center'
+                });
+
+                canvas.add(rect, label);
+                placeholders.push(rect, label);
+            }
+
+            canvas.renderAll();
+
             const dataURL = canvas.toDataURL({ format: 'png', multiplier: 2 });
             const link = document.createElement('a');
             link.download = 'nexus-export.png';
             link.href = dataURL;
             link.click();
+
+            // Cleanup
+            placeholders.forEach(p => canvas.remove(p));
+            canvas.renderAll();
         }
 
         function exportSVG() {
