@@ -711,6 +711,11 @@
                 <button class="tool-btn" id="ungroup-btn" title="Ungroup" style="flex:1"><i
                         data-lucide="split"></i></button>
             </div>
+            <div class="property-row">
+                <button class="tool-btn" id="sidebar-import-json" style="flex:1; background: rgba(0, 204, 136, 0.1); border: 1px solid rgba(0, 204, 136, 0.2); color: var(--accent-green);">
+                    <i data-lucide="folder-up" style="width:14px; margin-right:6px"></i> Import Project
+                </button>
+            </div>
         </div>
     </div>
 
@@ -728,7 +733,7 @@
             <button class="tool-btn" id="export-png" title="Export PNG"><i data-lucide="download"></i></button>
             <button class="tool-btn" id="export-svg" title="Export SVG"><i data-lucide="file-code"></i></button>
             <button class="tool-btn" id="export-json" title="Export JSON Project"><i data-lucide="file-json"></i></button>
-            <button class="tool-btn" id="import-json" title="Import JSON Project"><i data-lucide="upload"></i></button>
+            <button class="tool-btn" id="import-json" title="Import JSON Project"><i data-lucide="folder-up"></i></button>
             <div class="status-indicator">
                 <span id="save-status">Local Only</span>
                 <div class="status-dot" id="status-dot"></div>
@@ -945,6 +950,7 @@
             document.getElementById('export-svg').onclick = exportSVG;
             document.getElementById('export-json').onclick = exportJSON;
             document.getElementById('import-json').onclick = importJSON;
+            document.getElementById('sidebar-import-json').onclick = importJSON;
             document.getElementById('present-btn').onclick = togglePresentation;
 
             // Help overlay
@@ -1753,7 +1759,13 @@
 
         function exportJSON() {
             prepareForSave();
-            const json = JSON.stringify(canvas.toDatalessJSON(), null, 2);
+            const json = JSON.stringify(canvas.toDatalessJSON([
+                'id', 'x1', 'y1', 'x2', 'y2',
+                'startObjId', 'endObjId',
+                'startPort', 'endPort',
+                'arrowType', 'workflowData', 'fontSize',
+                'lockMovementX', 'lockMovementY', 'lockRotation', 'lockScalingX', 'lockScalingY', 'hasControls', 'editable'
+            ]), null, 2);
             const blob = new Blob([json], { type: 'application/json' });
             const url = URL.createObjectURL(blob);
             const link = document.createElement('a');
